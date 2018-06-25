@@ -1,48 +1,22 @@
 fileFormatVersion: 2
-guid: e0b6ba6975256cc41bd9ee52a0f50026
+guid: d42eb55b55f3f8749a6da03e96d9a21a
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
-    100000: cylinder_cone_1
-    100002: cylinder_full_0
-    100004: cylinder_hollow_2
-    100006: //RootNode
-    100008: cylinder_cone_5
-    100010: cylinder_full_4
-    100012: cylinder_full_6
-    100014: cylinder_hollow_7
-    400000: cylinder_cone_1
-    400002: cylinder_full_0
-    400004: cylinder_hollow_2
-    400006: //RootNode
-    400008: cylinder_cone_5
-    400010: cylinder_full_4
-    400012: cylinder_full_6
-    400014: cylinder_hollow_7
-    2100000: _defaultMat
-    2100002: customMaterial1
-    2100004: customMaterial2
-    2300000: cylinder_cone_1
-    2300002: cylinder_full_0
-    2300004: cylinder_hollow_2
-    2300006: cylinder_cone_5
-    2300008: cylinder_full_4
-    2300010: cylinder_full_6
-    2300012: cylinder_hollow_7
-    3300000: cylinder_cone_1
-    3300002: cylinder_full_0
-    3300004: cylinder_hollow_2
-    3300006: cylinder_cone_5
-    3300008: cylinder_full_4
-    3300010: cylinder_full_6
-    3300012: cylinder_hollow_7
-    4300000: cylinder_full_0
-    4300002: cylinder_cone_1
-    4300004: cylinder_hollow_2
-    4300006: cylinder_full_4
-    4300008: cylinder_cone_5
-    4300010: cylinder_full_6
-    4300012: cylinder_hollow_7
+    100000: sphere_full_0
+    100002: sphere_full_1
+    100004: //RootNode
+    400000: sphere_full_0
+    400002: sphere_full_1
+    400004: //RootNode
+    2100000: customMaterial1
+    2100002: _defaultMat
+    2300000: sphere_full_0
+    2300002: sphere_full_1
+    3300000: sphere_full_0
+    3300002: sphere_full_1
+    4300000: sphere_full_0
+    4300002: sphere_full_1
   externalObjects: {}
   materials:
     importMaterials: 1
