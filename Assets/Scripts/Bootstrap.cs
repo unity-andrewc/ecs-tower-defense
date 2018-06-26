@@ -49,8 +49,6 @@ public sealed class Bootstrap
         {
             InstanceTurret();
         }
-
-        TurretSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
     }
 
     private static void InstanceTurret()
@@ -60,7 +58,9 @@ public sealed class Bootstrap
         Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
         position += new Vector3(0.5f, 0.0f, 0.5f);
         Matrix4x4 trans = Matrix4x4.Translate(position);
-        Matrix4x4 headTrans = Matrix4x4.Translate(position + new Vector3(0.0f, 0.6128496f, 0.0f));
+        Vector3 headPosition = position + new Vector3(0.0f, 0.6128496f, 0.0f);
+        Matrix4x4 headTrans = Matrix4x4.Translate(headPosition);
+        Matrix4x4 headRotate = Matrix4x4.Rotate(Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f));
         Matrix4x4 gun1Trans = Matrix4x4.Translate(position + new Vector3(0.0f, 0.6128496f, 0.0f) + new Vector3(0.08563034f, 0.08383693f, 0.327976f));
         Matrix4x4 gun2Trans = Matrix4x4.Translate(position + new Vector3(0.0f, 0.6128496f, 0.0f) + new Vector3(-0.08563034f, 0.08383693f, 0.327976f));
         Matrix4x4 scale = Matrix4x4.Scale(new Vector3(1.0f, 1.0f, 1.0f));
@@ -71,7 +71,7 @@ public sealed class Bootstrap
         Entity turretGun2 = entityManager.CreateEntity(TurretGun2Archetype);
 
         Matrix4x4 world = trans * scale;
-        Matrix4x4 headWorld = headTrans * scale;
+        Matrix4x4 headWorld = headTrans *scale * headRotate;
         Matrix4x4 gun1World = gun1Trans * scale;
         Matrix4x4 gun2World = gun2Trans * scale;
 
@@ -80,7 +80,7 @@ public sealed class Bootstrap
         entityManager.AddSharedComponentData(turretBody, TurretBodyLook);
 
         entityManager.SetComponentData(turretHead, new TransformMatrix { Value = headWorld });
-        entityManager.SetComponentData(turretHead, new ComponentTypes.TurretHeadState());
+        entityManager.SetComponentData(turretHead, new ComponentTypes.TurretHeadState {Translation = headPosition});
         entityManager.AddSharedComponentData(turretHead, TurretHeadLook);
 
         entityManager.SetComponentData(turretGun1, new TransformMatrix { Value = gun1World });

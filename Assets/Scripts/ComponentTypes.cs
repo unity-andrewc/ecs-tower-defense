@@ -11,11 +11,14 @@ namespace ComponentTypes
 {
     public struct TurretBodyState : IComponentData
     {
-        public float AngleRadians;
     }
 
 	public struct TurretHeadState : IComponentData
 	{
+		public Vector3 Translation;
+		
+		public float TargetAngleRadians;
+		public float AngleRadians;
 	}
 
 	public struct TurretGun1State : IComponentData
