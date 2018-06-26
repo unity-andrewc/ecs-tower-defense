@@ -20,6 +20,7 @@ public sealed class Bootstrap
     public static MeshInstanceRenderer TurretGun2Look;
     public static MeshInstanceRenderer Enemy1BodyLook;
     public static MeshInstanceRenderer Enemy1HeadLook;
+    public static MeshInstanceRenderer TestEnemyLook;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void OnBeforeSceneLoadRuntimeMethod()
@@ -31,7 +32,7 @@ public sealed class Bootstrap
         TurretGun1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretGun1State));
         TurretGun2Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretGun2State));
        
-        Enemy1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Enemy));
+        Enemy1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(Enemy));
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -44,6 +45,8 @@ public sealed class Bootstrap
 
         Enemy1BodyLook = GetLookFromPrototype("EnemyBodyProto");
         Enemy1HeadLook = GetLookFromPrototype("EnemyHeadProto");
+        
+        TestEnemyLook = GetLookFromPrototype("TestEnemy");
         
         EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
         

@@ -32,8 +32,15 @@ namespace ComponentTypes
 	
 	public struct Enemy : IComponentData { }
 	
-	public struct EnemySpawnCooldown : IComponentData
+	public struct EnemySpawn : IComponentData
 	{
 		public float Cooldown;
+	}
+	
+	public struct WaveSpawn : IComponentData
+	{
+		public float Cooldown;
+		public float SpawnedEnemyCount;
+		public Random.State RandomState;
 	}
 }

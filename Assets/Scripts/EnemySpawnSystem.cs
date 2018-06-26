@@ -8,62 +8,113 @@ using UnityEngine;
 
 public class EnemySpawnSystem : ComponentSystem
 {    
-    struct State
+    struct EnemySpawnState
     {
         public int Length;
-        public ComponentDataArray<EnemySpawnCooldown> Cooldown;
+        public ComponentDataArray<EnemySpawn> Enemy;
+    }
+    
+    struct WaveSpawnState
+    {
+        public int Length;
+        public ComponentDataArray<WaveSpawn> Wave;
     }
 
-    [Inject] State m_State;
+    [Inject] EnemySpawnState m_EnemySpawnState;
+    [Inject] WaveSpawnState m_WaveSpawnState;
+
 
     public static void SetupComponentData(EntityManager entityManager)
     {
-        var arch = entityManager.CreateArchetype(typeof(EnemySpawnCooldown));
+        var arch = entityManager.CreateArchetype(typeof(WaveSpawn), typeof(EnemySpawn));
         var stateEntity = entityManager.CreateEntity(arch);
+        
         var oldState = Random.state;
         Random.InitState(0xaf77);
-        entityManager.SetComponentData(stateEntity, new EnemySpawnCooldown { Cooldown = 0.0f });
+        entityManager.SetComponentData(stateEntity, new WaveSpawn { Cooldown = Constants.Enemy.WAVE_COOLDOWN , SpawnedEnemyCount = 0});
+        entityManager.SetComponentData(stateEntity, new EnemySpawn { Cooldown = 0.0f });
         Random.state = oldState;
     }
 
-
+    
     protected override void OnUpdate()
     {
-        var cooldown = Mathf.Max(0.0f, m_State.Cooldown[0].Cooldown - Time.deltaTime);
-        bool spawn = cooldown <= 0.0f;
-
-        if (spawn)
+        var wave = m_WaveSpawnState.Wave[0];
+        if (wave.SpawnedEnemyCount < 3)
         {
-            cooldown = GetCooldown();
+            var cooldown = Mathf.Max(0.0f, m_EnemySpawnState.Enemy[0].Cooldown - Time.deltaTime);
+            bool spawn = cooldown <= 0.0f;
+
+            if (spawn)
+            {
+                cooldown = Constants.Enemy.COOLDOWN;
+            }
+
+            m_EnemySpawnState.Enemy[0] = new EnemySpawn { Cooldown = cooldown };
+
+            if (spawn)
+            {
+                SpawnEnemy();
+            }
         }
-
-        m_State.Cooldown[0] = new EnemySpawnCooldown { Cooldown = cooldown };
-
-        if (spawn)
+        else
         {
-            SpawnEnemy();
+            var cooldown = Mathf.Max(0.0f, wave.Cooldown - Time.deltaTime);
+            bool spawn = cooldown <= 0.0f;
+
+            wave.Cooldown = cooldown;
+            m_WaveSpawnState.Wave[0] = wave;
+
+            if (spawn)
+            {
+                SpawnWave();
+            }
         }
+    }
+
+    void SpawnWave()
+    {
+        var wave = m_WaveSpawnState.Wave[0];
+
+        wave.SpawnedEnemyCount = 0;
+        wave.Cooldown = Constants.Enemy.WAVE_COOLDOWN;
+        
+        m_WaveSpawnState.Wave[0] = wave;
     }
 
     void SpawnEnemy()
     {
+        var wave = m_WaveSpawnState.Wave[0];
+        var oldState = Random.state;
+        Random.state = wave.RandomState;
+        wave.SpawnedEnemyCount++;
+        
         Debug.Log("Spawn Enemy");
         float3 spawnPosition = GetSpawnLocation();
-        var trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, new float3(0.1f, 0.02f, 0.1f));
+        var trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, Vector3.one);
         
         PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
-        PostUpdateCommands.SetComponent(new TransformMatrix { Value = trs });
+        PostUpdateCommands.SetComponent(new TransformMatrix {Value = trs});
+        PostUpdateCommands.SetComponent(new Position {Value = spawnPosition});
+        PostUpdateCommands.SetComponent(new Rotation {Value = quaternion.identity});
         PostUpdateCommands.SetComponent(default(Enemy));
-        PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1BodyLook);
+        PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
         
         // TODO : We may have one mesh enemy
         // TODO : We may adjust the position of the head of the enemy
 
-        trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, new float3(0.06f, 0.04f, 0.06f));
+        trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, Vector3.one);
         PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
-        PostUpdateCommands.SetComponent(new TransformMatrix { Value = trs });
+        PostUpdateCommands.SetComponent(new TransformMatrix {Value = trs});
+        PostUpdateCommands.SetComponent(new Position {Value = spawnPosition});
+        PostUpdateCommands.SetComponent(new Rotation {Value = quaternion.identity});
         PostUpdateCommands.SetComponent(default(Enemy));
-        PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1HeadLook);
+        PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
+        
+        wave.RandomState = Random.state;
+
+        m_WaveSpawnState.Wave[0] = wave;
+        Random.state = oldState;
         
     }
 
