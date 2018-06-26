@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using ComponentTypes;
+﻿using ComponentTypes;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -100,16 +98,16 @@ public class EnemySpawnSystem : ComponentSystem
         PostUpdateCommands.SetComponent(default(Enemy));
         PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
         
-        // TODO : We may have one mesh enemy
-        // TODO : We may adjust the position of the head of the enemy
-
-        trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, Vector3.one);
-        PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
-        PostUpdateCommands.SetComponent(new TransformMatrix {Value = trs});
-        PostUpdateCommands.SetComponent(new Position {Value = spawnPosition});
-        PostUpdateCommands.SetComponent(new Rotation {Value = quaternion.identity});
-        PostUpdateCommands.SetComponent(default(Enemy));
-        PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
+//        // TODO : We may have one mesh enemy
+//        // TODO : We may adjust the position of the head of the enemy
+//
+//        trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, Vector3.one);
+//        PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
+//        PostUpdateCommands.SetComponent(new TransformMatrix {Value = trs});
+//        PostUpdateCommands.SetComponent(new Position {Value = spawnPosition});
+//        PostUpdateCommands.SetComponent(new Rotation {Value = quaternion.identity});
+//        PostUpdateCommands.SetComponent(default(Enemy));
+//        PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
         
         wave.RandomState = Random.state;
 
@@ -118,13 +116,7 @@ public class EnemySpawnSystem : ComponentSystem
         
     }
 
-    // TODO : We may use the components to store wave's cooldown value
-    float GetCooldown()
-    {
-        // will be changed, (WIP)
-        return 2.5f;
-    }
-
+    //TODO : it shouldn't be hardcoded?
     float3 GetSpawnLocation()
     {
         float3 position = new float3(10.0f, 0.0f, 0.0f);
