@@ -4,7 +4,6 @@ using ComponentTypes;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Unity.Transforms2D;
 using UnityEngine;
 
 public class EnemySpawnSystem : ComponentSystem
@@ -49,25 +48,20 @@ public class EnemySpawnSystem : ComponentSystem
     void SpawnEnemy()
     {
         Debug.Log("Spawn Enemy");
-
         float3 spawnPosition = GetSpawnLocation();
-        
-        Matrix4x4 trans = Matrix4x4.Translate(spawnPosition);
-        Matrix4x4 scale = Matrix4x4.Scale(new float3(0.1f, 0.02f, 0.1f));
-        Matrix4x4 world = trans * scale;
+        var trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, new float3(0.1f, 0.02f, 0.1f));
         
         PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
-        PostUpdateCommands.SetComponent(new TransformMatrix { Value = world });
+        PostUpdateCommands.SetComponent(new TransformMatrix { Value = trs });
         PostUpdateCommands.SetComponent(default(Enemy));
         PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1BodyLook);
         
         // TODO : We may have one mesh enemy
         // TODO : We may adjust the position of the head of the enemy
-        scale = Matrix4x4.Scale(new float3(0.06f, 0.04f, 0.06f));
-        world = trans * scale;
-        
+
+        trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, new float3(0.06f, 0.04f, 0.06f));
         PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
-        PostUpdateCommands.SetComponent(new TransformMatrix { Value = world });
+        PostUpdateCommands.SetComponent(new TransformMatrix { Value = trs });
         PostUpdateCommands.SetComponent(default(Enemy));
         PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1HeadLook);
         
