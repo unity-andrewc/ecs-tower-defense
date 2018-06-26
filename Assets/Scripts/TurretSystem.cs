@@ -11,7 +11,8 @@ public class TurretSystem : ComponentSystem
     public struct Data
     {
         public int Length;
-        public ComponentDataArray<ComponentTypes.TurretState> TurretState;
+        public ComponentDataArray<ComponentTypes.TurretBodyState> TurretBodyState;
+        public ComponentDataArray<ComponentTypes.TurretHeadState> TurretHeadState;
     }
 
     [Inject]
@@ -19,25 +20,21 @@ public class TurretSystem : ComponentSystem
 
     public static void SetupComponentData(EntityManager entityManager)
     {
-        Debug.Log("SetupComponentData");
-        var arch = entityManager.CreateArchetype(typeof(ComponentTypes.TurretState));
-
+        var arch = entityManager.CreateArchetype(typeof(ComponentTypes.TurretBodyState));
         var stateEntity = entityManager.CreateEntity(arch);
         var oldState = Random.state;
 
-        entityManager.SetComponentData(stateEntity, new ComponentTypes.TurretState {AngleRadians = 0.0f });
+        entityManager.SetComponentData(stateEntity, new ComponentTypes.TurretBodyState {AngleRadians = 0.0f });
     }
 
     protected override void OnUpdate()
     {
-        Debug.Log("Test " + m_data.Length);
-
         for (int idx = 0; idx < m_data.Length; ++idx)
         {
-            ComponentTypes.TurretState temp = m_data.TurretState[idx];
+            ComponentTypes.TurretBodyState temp = m_data.TurretBodyState[idx];
             temp.AngleRadians = 2.0f;
 
-            m_data.TurretState[idx] = temp;
+            m_data.TurretBodyState[idx] = temp;
         }
     }
 }
