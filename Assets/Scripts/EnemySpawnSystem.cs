@@ -71,7 +71,7 @@ public class EnemySpawnSystem : ComponentSystem
     float GetCooldown()
     {
         // will be changed, (WIP)
-        return 1000.15f;
+        return 2.5f;
     }
 
     float3 GetSpawnLocation()
