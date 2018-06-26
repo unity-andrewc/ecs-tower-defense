@@ -20,24 +20,28 @@ public class EnemyMoveSystem : ComponentSystem
         for (int i = 0; i < m_State.Length; ++i)
         {
             var data = m_State.EnemyMatrices[i].Value;
-//            Debug.Log("Transform Matrix 0: " + m_State.EnemyMatrices[i].Value.c0);
-//            Debug.Log("Transform Matrix 1: " + m_State.EnemyMatrices[i].Value.c1);
-//            Debug.Log("Transform Matrix 2: " + m_State.EnemyMatrices[i].Value.c2);
-//            Debug.Log("Transform Matrix 3: " + m_State.EnemyMatrices[i].Value.c3);
-
-            var movePosition = new float3(m_State.EnemyMatrices[i].Value.c3.x - 0.01f
-                , m_State.EnemyMatrices[i].Value.c3.y
-                , m_State.EnemyMatrices[i].Value.c3.z);
             
-            // TODO : find a better way to get scale
-            var scale = new float3(m_State.EnemyMatrices[i].Value.c0.x
-                            , m_State.EnemyMatrices[i].Value.c1.y
-                            , m_State.EnemyMatrices[i].Value.c2.z);
+            var c0vec3 = new Vector3(data.c0.x, data.c0.y, data.c0.z);
+            var c1vec3 = new Vector3(data.c1.x, data.c1.y, data.c1.z);
+            var c2vec3 = new Vector3(data.c2.x, data.c2.y, data.c2.z);
+            var c3vec3 = new Vector3(data.c3.x, data.c3.y, data.c3.z);
+            
+            // it might not be the right way to decompose the Matrix
+            // below is an applied version of this answer -> https://answers.unity.com/questions/402280/how-to-decompose-a-trs-matrix.html
+            
+            var movePosition = new float3(c3vec3.x - 0.01f
+                            , c3vec3.y
+                            , c3vec3.z);
 
-            data = Matrix4x4.TRS(movePosition, Quaternion.identity, scale);
+            var scale = new float3(c0vec3.magnitude
+                            , c1vec3.magnitude
+                            , c2vec3.magnitude);
+            
+            var rotation = Quaternion.LookRotation(c2vec3
+                            , c1vec3);
+            
+            data = Matrix4x4.TRS(movePosition, rotation, scale);
             m_State.EnemyMatrices[i] = new TransformMatrix {Value = data};
-//            Debug.Log("Transform Matrix 3 After: " + m_State.EnemyMatrices[i].Value.c3);
-//            Debug.Log("Transform Matrix 3 After data: " + data.c3);
         }
     }
     
