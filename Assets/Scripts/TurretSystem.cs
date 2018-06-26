@@ -1,18 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
-using Unity.Transforms2D;
 using UnityEngine;
+using System.ComponentModel.Design;
+using System.Runtime.CompilerServices;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
+using Unity.Burst;
+using Unity.Mathematics;
+using Unity.Transforms2D;
 
 public class TurretSystem : ComponentSystem
 {
     public struct Data
     {
         public int Length;
-        public ComponentDataArray<TransformMatrix> Transforms;
-        public ComponentDataArray<ComponentTypes.TurretHeadState> TurretHeadState;
+        public ComponentDataArray<LocalRotation> LocalRotation;
+        public ComponentDataArray<ComponentTypes.TurretHeadState> State;
     }
 
     [Inject]
@@ -20,41 +25,34 @@ public class TurretSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        Debug.Log(m_data.Length);
         for (int idx = 0; idx < m_data.Length; ++idx)
         {
-            ComponentTypes.TurretHeadState temp = m_data.TurretHeadState[idx];
+            ComponentTypes.TurretHeadState tempState = m_data.State[idx];
 
-            if (temp.AngleRadians > 360.0f)
+            // Wrap the rotation angle to keep between 0-360.
+            if (tempState.Angle > 360.0f)
+                tempState.Angle -= 360.0f;
+
+            if (tempState.Angle < 0.0f)
+                tempState.Angle += 360.0f;
+
+            float delta = tempState.TargetAngle - tempState.Angle;
+
+            // Determine if near target location.
+            if (Mathf.Abs(delta) < 1.0f)
             {
-                temp.AngleRadians -= 360.0f;
+                tempState.TargetAngle = Random.Range(0, 360.0f);
             }
 
-            if (temp.AngleRadians < 0.0f)
-            {
-                temp.AngleRadians += 360.0f;
-            }
+            // Rotate towards target angle.
+            tempState.Angle += Mathf.Sign(delta) * (45.0f * Time.deltaTime);
 
-            float delta = temp.TargetAngleRadians - temp.AngleRadians;
-            float absDelta = Mathf.Abs(delta);
+            m_data.State[idx] = tempState;
 
-            if (absDelta < 1.0f)
-            {
-                temp.TargetAngleRadians = Random.Range(0, 360.0f);
-            }
-
-            temp.AngleRadians += Mathf.Sign(delta) * (45.0f * Time.deltaTime);
-
-            m_data.TurretHeadState[idx] = temp;
-
-
-            TransformMatrix tempMatrix = m_data.Transforms[idx];
-
-            Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(0.0f, temp.AngleRadians, 0.0f));
-            Matrix4x4 trans = Matrix4x4.Translate(temp.Translation);
-
-            rot = trans * rot;
-
-            m_data.Transforms[idx] = new TransformMatrix {Value = rot};
+            LocalRotation tempRotation = m_data.LocalRotation[idx];
+            tempRotation.Value = Quaternion.Euler(0.0f, tempState.Angle, 0.0f);
+            m_data.LocalRotation[idx] = tempRotation;
         }
     }
 }

@@ -26,10 +26,10 @@ public sealed class Bootstrap
     {
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
-        TurretBodyArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretBodyState));
-        TurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretHeadState));
-        TurretGun1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretGun1State));
-        TurretGun2Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretGun2State));
+        TurretBodyArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(ComponentTypes.TurretBodyState));
+        TurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretHeadState));
+        TurretGun1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretGun1State));
+        TurretGun2Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretGun2State));
        
         Enemy1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Enemy));
     }
@@ -70,37 +70,40 @@ public sealed class Bootstrap
         Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
         position += new Vector3(0.5f, 0.0f, 0.5f);
         Matrix4x4 trans = Matrix4x4.Translate(position);
+
         Vector3 headPosition = position + new Vector3(0.0f, 0.6128496f, 0.0f);
-        Matrix4x4 headTrans = Matrix4x4.Translate(headPosition);
-        Matrix4x4 headRotate = Matrix4x4.Rotate(Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f));
-        Matrix4x4 gun1Trans = Matrix4x4.Translate(position + new Vector3(0.0f, 0.6128496f, 0.0f) + new Vector3(0.08563034f, 0.08383693f, 0.327976f));
-        Matrix4x4 gun2Trans = Matrix4x4.Translate(position + new Vector3(0.0f, 0.6128496f, 0.0f) + new Vector3(-0.08563034f, 0.08383693f, 0.327976f));
-        Matrix4x4 scale = Matrix4x4.Scale(new Vector3(1.0f, 1.0f, 1.0f));
+        Vector3 gun1Position = new Vector3(0.08563034f, 0.08383693f, 0.327976f);
+        Vector3 gun2Position = new Vector3(-0.08563034f, 0.08383693f, 0.327976f);
+        float rotateAngle = Random.Range(0.0f, 360.0f);
 
         Entity turretBody = entityManager.CreateEntity(TurretBodyArchetype);
         Entity turretHead = entityManager.CreateEntity(TurretHeadArchetype);
         Entity turretGun1 = entityManager.CreateEntity(TurretGun1Archetype);
         Entity turretGun2 = entityManager.CreateEntity(TurretGun2Archetype);
 
-        Matrix4x4 world = trans * scale;
-        Matrix4x4 headWorld = headTrans *scale * headRotate;
-        Matrix4x4 gun1World = gun1Trans * scale;
-        Matrix4x4 gun2World = gun2Trans * scale;
+        Matrix4x4 world = trans;
 
-        entityManager.SetComponentData(turretBody, new TransformMatrix { Value = world });
-        entityManager.SetComponentData(turretBody, new ComponentTypes.TurretBodyState());
+        entityManager.SetComponentData(turretBody, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretBody, new Position {Value = position});
+        entityManager.SetComponentData(turretBody, new Rotation {Value = quaternion.identity});
         entityManager.AddSharedComponentData(turretBody, TurretBodyLook);
 
-        entityManager.SetComponentData(turretHead, new TransformMatrix { Value = headWorld });
-        entityManager.SetComponentData(turretHead, new ComponentTypes.TurretHeadState {Translation = headPosition});
+        entityManager.SetComponentData(turretHead, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretHead, new LocalPosition {Value = new Vector3(0.0f, 0.6128496f, 0.0f)});
+        entityManager.SetComponentData(turretHead, new LocalRotation {Value = quaternion.identity});
+        entityManager.SetComponentData(turretHead, new TransformParent {Value = turretBody});
         entityManager.AddSharedComponentData(turretHead, TurretHeadLook);
 
-        entityManager.SetComponentData(turretGun1, new TransformMatrix { Value = gun1World });
-        entityManager.SetComponentData(turretGun1, new ComponentTypes.TurretGun1State());
+        entityManager.SetComponentData(turretGun1, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretGun1, new TransformParent {Value = turretHead});
+        entityManager.SetComponentData(turretGun1, new LocalPosition {Value = new Vector3(0.08563034f, 0.08383693f, 0.327976f)});
+        entityManager.SetComponentData(turretGun1, new LocalRotation {Value = quaternion.identity});
         entityManager.AddSharedComponentData(turretGun1, TurretGun1Look);
 
-        entityManager.SetComponentData(turretGun2, new TransformMatrix { Value = gun2World });
-        entityManager.SetComponentData(turretGun2, new ComponentTypes.TurretGun2State());
+        entityManager.SetComponentData(turretGun2, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretGun2, new TransformParent {Value = turretHead});
+        entityManager.SetComponentData(turretGun2, new LocalPosition {Value = new Vector3(-0.08563034f, 0.08383693f, 0.327976f)});
+        entityManager.SetComponentData(turretGun2, new LocalRotation {Value = quaternion.identity});
         entityManager.AddSharedComponentData(turretGun2, TurretGun2Look);
     }
 
