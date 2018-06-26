@@ -28,4 +28,11 @@ namespace ComponentTypes
 	public struct TurretGun2State : IComponentData
 	{
 	}
+	
+	public struct Enemy : IComponentData { }
+	
+	public struct EnemySpawnCooldown : IComponentData
+	{
+		public float Cooldown;
+	}
 }

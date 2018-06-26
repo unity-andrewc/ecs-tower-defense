@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using ComponentTypes;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using Unity.Rendering;
@@ -11,11 +12,14 @@ public sealed class Bootstrap
     public static EntityArchetype TurretHeadArchetype;
     public static EntityArchetype TurretGun1Archetype;
     public static EntityArchetype TurretGun2Archetype;
+    public static EntityArchetype Enemy1Archetype;
 
     public static MeshInstanceRenderer TurretBodyLook;
     public static MeshInstanceRenderer TurretHeadLook;
     public static MeshInstanceRenderer TurretGun1Look;
     public static MeshInstanceRenderer TurretGun2Look;
+    public static MeshInstanceRenderer Enemy1BodyLook;
+    public static MeshInstanceRenderer Enemy1HeadLook;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void OnBeforeSceneLoadRuntimeMethod()
@@ -26,6 +30,8 @@ public sealed class Bootstrap
         TurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretHeadState));
         TurretGun1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretGun1State));
         TurretGun2Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretGun2State));
+       
+        Enemy1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Enemy));
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -34,7 +40,13 @@ public sealed class Bootstrap
         TurretBodyLook = GetLookFromPrototype("bodyproto"); 
         TurretHeadLook = GetLookFromPrototype("headproto"); 
         TurretGun1Look = GetLookFromPrototype("gun1proto"); 
-        TurretGun2Look = GetLookFromPrototype("gun2proto"); 
+        TurretGun2Look = GetLookFromPrototype("gun2proto");
+
+        Enemy1BodyLook = GetLookFromPrototype("EnemyBodyProto");
+        Enemy1HeadLook = GetLookFromPrototype("EnemyHeadProto");
+        
+        EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
+        
         NewGame();
     }
 
