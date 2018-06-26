@@ -9,9 +9,13 @@ public sealed class Bootstrap
 {
     public static EntityArchetype TurretBodyArchetype;
     public static EntityArchetype TurretHeadArchetype;
+    public static EntityArchetype TurretGun1Archetype;
+    public static EntityArchetype TurretGun2Archetype;
 
     public static MeshInstanceRenderer TurretBodyLook;
     public static MeshInstanceRenderer TurretHeadLook;
+    public static MeshInstanceRenderer TurretGun1Look;
+    public static MeshInstanceRenderer TurretGun2Look;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void OnBeforeSceneLoadRuntimeMethod()
@@ -20,6 +24,8 @@ public sealed class Bootstrap
 
         TurretBodyArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretBodyState));
         TurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretHeadState));
+        TurretGun1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretGun1State));
+        TurretGun2Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(ComponentTypes.TurretGun2State));
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -27,6 +33,8 @@ public sealed class Bootstrap
     {
         TurretBodyLook = GetLookFromPrototype("bodyproto"); 
         TurretHeadLook = GetLookFromPrototype("headproto"); 
+        TurretGun1Look = GetLookFromPrototype("gun1proto"); 
+        TurretGun2Look = GetLookFromPrototype("gun2proto"); 
         NewGame();
     }
 
@@ -55,7 +63,9 @@ public sealed class Bootstrap
         Matrix4x4 scale = Matrix4x4.Scale(new Vector3(1.0f, 1.0f, 1.0f));
 
         Entity turretBody = entityManager.CreateEntity(TurretBodyArchetype);
-        Entity turretHead = entityManager.CreateEntity(TurretHeadArchetype);
+        //Entity turretHead = entityManager.CreateEntity(TurretHeadArchetype);
+        //Entity turretGun1 = entityManager.CreateEntity(TurretGun1Archetype);
+        //Entity turretGun2 = entityManager.CreateEntity(TurretGun2Archetype);
 
         Matrix4x4 world = trans * scale;
 
@@ -63,16 +73,24 @@ public sealed class Bootstrap
         entityManager.SetComponentData(turretBody, new ComponentTypes.TurretBodyState());
         entityManager.AddSharedComponentData(turretBody, TurretBodyLook);
 
-        entityManager.SetComponentData(turretHead, new TransformMatrix { Value = world });
-        entityManager.SetComponentData(turretHead, new ComponentTypes.TurretHeadState());
-        entityManager.AddSharedComponentData(turretHead, TurretHeadLook);
+        //entityManager.SetComponentData(turretHead, new TransformMatrix { Value = world });
+        //entityManager.SetComponentData(turretHead, new ComponentTypes.TurretHeadState());
+        //entityManager.AddSharedComponentData(turretHead, TurretHeadLook);
+
+        //entityManager.SetComponentData(turretGun1, new TransformMatrix { Value = world });
+        //entityManager.SetComponentData(turretGun1, new ComponentTypes.TurretGun1State());
+        //entityManager.AddSharedComponentData(turretGun1, TurretGun1Look);
+
+        //entityManager.SetComponentData(turretGun2, new TransformMatrix { Value = world });
+        //entityManager.SetComponentData(turretGun2, new ComponentTypes.TurretGun2State());
+        //entityManager.AddSharedComponentData(turretGun2, TurretGun2Look);
     }
 
     private static MeshInstanceRenderer GetLookFromPrototype(string protoName)
     {
         var proto = GameObject.Find(protoName);
         var result = proto.GetComponent<MeshInstanceRendererComponent>().Value;
-        Object.Destroy(proto);
+        //Object.Destroy(proto);
         return result;
     }
 }

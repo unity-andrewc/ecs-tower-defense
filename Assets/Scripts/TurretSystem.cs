@@ -13,6 +13,8 @@ public class TurretSystem : ComponentSystem
         public int Length;
         public ComponentDataArray<ComponentTypes.TurretBodyState> TurretBodyState;
         public ComponentDataArray<ComponentTypes.TurretHeadState> TurretHeadState;
+        public ComponentDataArray<ComponentTypes.TurretGun1State> TurretGun1State;
+        public ComponentDataArray<ComponentTypes.TurretGun2State> TurretGun2State;
     }
 
     [Inject]

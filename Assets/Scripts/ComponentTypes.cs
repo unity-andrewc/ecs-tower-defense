@@ -17,4 +17,12 @@ namespace ComponentTypes
 	public struct TurretHeadState : IComponentData
 	{
 	}
+
+	public struct TurretGun1State : IComponentData
+	{
+	}
+
+	public struct TurretGun2State : IComponentData
+	{
+	}
 }
