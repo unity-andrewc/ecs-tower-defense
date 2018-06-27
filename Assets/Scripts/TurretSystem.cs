@@ -54,7 +54,7 @@ public class TurretSystem : ComponentSystem
             {
                 Vector3 toEnemy = m_enemies.EnemyPositions[enemyIdx].Value - position.Value;
                 
-                if (toEnemy.magnitude < nearestDistance && toEnemy.magnitude < 10.0f)
+                if (toEnemy.magnitude < nearestDistance && toEnemy.magnitude < 5.0f)
                 {
                     nearestDistance = toEnemy.magnitude;
                     nearestPosition = m_enemies.EnemyPositions[enemyIdx].Value;
@@ -79,7 +79,7 @@ public class TurretSystem : ComponentSystem
                 if (cross.y < 0.0f)
                 {
                     tempState.TargetAngle = 360.0f - tempState.TargetAngle;           
-                }
+                }   
 
                 rotSpeed = 180.0f;
 
@@ -90,21 +90,29 @@ public class TurretSystem : ComponentSystem
                 Vector3 angleTargetCross = Vector3.Cross(angleVector, targetVector);
                 angleTargetCross.Normalize();
 
+                float adjustment = Time.deltaTime * rotSpeed;
+
+                if (adjustment > Mathf.Abs(tempState.TargetAngle - tempState.Angle))
+                {
+                    adjustment = Mathf.Abs(tempState.TargetAngle - tempState.Angle);
+                }
+                    
                 if (angleTargetCross.y < 0.0f)
                 {
-                    tempState.Angle -= Time.deltaTime * rotSpeed;
-                    if (tempState.Angle < tempState.TargetAngle)
-                        tempState.Angle = tempState.TargetAngle;
+                    tempState.Angle -= adjustment;
                 }
                 else
                 {
-                    tempState.Angle += Time.deltaTime * rotSpeed;
-                    if (tempState.Angle > tempState.TargetAngle)
-                        tempState.Angle = tempState.TargetAngle;
+                    tempState.Angle += adjustment;
                 }
             }
 
 
+            if (tempState.Angle < 0.0f)
+                tempState.Angle += 360.0f;
+            if (tempState.Angle > 0.0f)
+                tempState.Angle -= 360.0f;
+                
             LocalRotation tempRotation = m_data.LocalRotation[idx];
             tempRotation.Value = Quaternion.Euler(0.0f, tempState.Angle, 0.0f);
             m_data.LocalRotation[idx] = tempRotation;

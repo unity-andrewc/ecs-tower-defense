@@ -72,6 +72,7 @@ public sealed class Bootstrap
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
         Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
+        //position = new Vector3(0.0f, 0.0f, -2.0f);
         position += new Vector3(0.5f, 0.0f, 0.5f);
         Matrix4x4 trans = Matrix4x4.Translate(position);
 
