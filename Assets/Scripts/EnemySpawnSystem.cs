@@ -44,6 +44,11 @@ public class EnemySpawnSystem : ComponentSystem
     
     protected override void OnUpdate()
     {
+        if (m_WaveSpawnState.Length <= 0)
+        {
+            return;
+        }
+        
         var wave = m_WaveSpawnState.Wave[0];
         if (wave.SpawnedEnemyCount < 3)
         {

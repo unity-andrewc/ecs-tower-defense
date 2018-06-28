@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using ComponentTypes;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class UpdateInputSystem : ComponentSystem
     {
         public int Length;
         public EntityArray InputEntities;
-        public ComponentDataArray<ComponentTypes.InputState> Input;
+        public ComponentDataArray<InputState> Input;
         public ComponentDataArray<Position> TurretPosition;
     }
     
@@ -18,32 +19,59 @@ public class UpdateInputSystem : ComponentSystem
     {
         public int Length;
         public EntityArray InputEntities;
-        public ComponentDataArray<ComponentTypes.InputState> Input;
+        public ComponentDataArray<InputState> Input;
         public ComponentDataArray<LocalPosition> TurretHeadPosition;
+    }
+    
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<PlayerSessionData> Player;
     }
 
     [Inject] InputData m_Inputs;
     [Inject] InputDataChildren m_InputChildren;
+    [Inject] PlayerData m_PlayerData;
 
     protected override void OnUpdate()
     {
+        if (m_PlayerData.Player.Length < 0 || m_PlayerData.Player[0].CurrencyAmount <= 0)
+        {
+            for (int i = 0; i < m_Inputs.InputEntities.Length; i++)
+            {
+                var data = m_Inputs.InputEntities[i];
+                PostUpdateCommands.DestroyEntity(data);
+            }
+            for (int i = 0; i < m_InputChildren.InputEntities.Length; i++)
+            {
+                var data = m_InputChildren.InputEntities[i];
+                PostUpdateCommands.DestroyEntity(data);
+            }
+            
+            return;
+        }
+        
         if (m_Inputs.Length > 0)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit))
             {
-//                Debug.Log("Raycast point: " + hit.point);
                 var gridIndex = Grid.ConvertToGridIndex(hit.point);
                 var gridWorldPos = Grid.ConvertToWorldPosition(gridIndex);
+                
                 if (Input.GetMouseButtonDown(0))
                 {
-                    var em = PostUpdateCommands;
                     if (hit.collider.tag.Equals("Floor") && PathingSystem.TryFindPathWithBlocker(gridIndex))
                     {
+                        for (int i = 0; i < m_PlayerData.Player.Length; i++)
+                        {
+                            var playerData = m_PlayerData.Player[i];
+                            playerData.CurrencyAmount--;
+                            m_PlayerData.Player[i] = playerData;
+                        }
+
                         InstanceTurret(gridWorldPos);
-//                        Debug.Log("Grid Index: " + gridIndex);
-//                        Debug.Log("Grid World Pos: " + gridWorldPos);
                     } 
                 }
                 else if (Input.GetMouseButtonDown(1))
@@ -51,13 +79,11 @@ public class UpdateInputSystem : ComponentSystem
                     for (int i = 0; i < m_Inputs.InputEntities.Length; i++)
                     {
                         var data = m_Inputs.InputEntities[i];
-//                        Debug.Log("Input entity: " + data);
                         PostUpdateCommands.DestroyEntity(data);
                     }
                     for (int i = 0; i < m_InputChildren.InputEntities.Length; i++)
                     {
                         var data = m_InputChildren.InputEntities[i];
-//                        Debug.Log("Input entity: " + data);
                         PostUpdateCommands.DestroyEntity(data);
                     }
                 }
@@ -76,6 +102,7 @@ public class UpdateInputSystem : ComponentSystem
 
     public static void InstanceTurret(float3 position)
     {
+
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
         Matrix4x4 trans = Matrix4x4.Translate(position);
 //        Vector3 headPosition = position + new float3(0.0f, 0.6128496f, 0.0f);
@@ -112,5 +139,6 @@ public class UpdateInputSystem : ComponentSystem
         entityManager.SetComponentData(turretGun2, new LocalPosition {Value = new Vector3(-0.08563034f, 0.08383693f, 0.327976f)});
         entityManager.SetComponentData(turretGun2, new LocalRotation {Value = quaternion.identity});
         entityManager.AddSharedComponentData(turretGun2, Bootstrap.TurretGun2Look);
+        
     }
 }

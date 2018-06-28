@@ -1,5 +1,5 @@
 ﻿using ComponentTypes;
-using Unity.Collections;
+using TMPro;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -20,11 +20,21 @@ public class UpdateHUDSystem : ComponentSystem
         public int Length;
         public ComponentDataArray<WaveSpawn> Wave;
     }
+    
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<ComponentTypes.PlayerSessionData> Player;
+    }
 
     [Inject] EnemySpawnState m_EnemySpawnState;
     [Inject] WaveSpawnState m_WaveSpawnState;
+    [Inject] PlayerData m_PlayerData;
 
     private static Image waveFillImage;
+    private static TextMeshProUGUI currencyAmount;
+    private static GameObject ingameMenu;
+    private static GameObject mainMenu;
 
     public static void SetupGameObjects(EntityManager entityManager)
     {
@@ -54,6 +64,29 @@ public class UpdateHUDSystem : ComponentSystem
                 }
             }
         }
+        
+        var currencyInfoContainer = GameObject.Find("CurrencyInfo");
+        for (int i = 0; i < currencyInfoContainer.transform.childCount; i++)
+        {
+            var text = currencyInfoContainer.transform.GetChild(i).GetComponent<TextMeshProUGUI>();
+            if (text != null)
+            {
+                currencyAmount = text;
+            }
+        }
+        
+        var playButton = GameObject.Find("PlayButton");
+        ingameMenu = GameObject.Find("InGameMenu");
+        mainMenu = GameObject.Find("MainMenu");
+        if (playButton != null)
+        {
+            playButton.GetComponent<Button>().onClick.AddListener(()=>
+            {
+                mainMenu.gameObject.SetActive(false);
+                Bootstrap.NewGame();
+                ingameMenu.gameObject.SetActive(true);
+            });
+        }
     }
 
     private static void TurretButtonListener(EntityManager entityManager)
@@ -80,6 +113,11 @@ public class UpdateHUDSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if (m_WaveSpawnState.Length <= 0)
+        {
+            return;
+        }
+        
         var wave = m_WaveSpawnState.Wave[0];
         if (wave.SpawnedEnemyCount >= 3)
         {
@@ -89,6 +127,8 @@ public class UpdateHUDSystem : ComponentSystem
         {
             waveFillImage.fillAmount = 1.0f;
         }
+
+        currencyAmount.text = m_PlayerData.Player[0].CurrencyAmount.ToString();
     }
 
 }
