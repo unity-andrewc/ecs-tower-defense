@@ -63,4 +63,8 @@ namespace ComponentTypes
     {
         public int2 GridIndex;
     }
+	
+	public struct Input : IComponentData
+	{
+	}
 }

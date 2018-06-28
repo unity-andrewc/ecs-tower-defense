@@ -54,7 +54,7 @@ public sealed class Bootstrap
         TestEnemyLook = GetLookFromPrototype("TestEnemy");
         
         EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
-        UpdateHUDSystem.SetupGameObjects();
+        UpdateHUDSystem.SetupGameObjects(World.Active.GetOrCreateManager<EntityManager>());
         
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
         Entity spawnPoint = entityManager.CreateEntity(SpawnPointArchetype);

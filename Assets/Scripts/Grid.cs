@@ -6,7 +6,7 @@ public static class Grid
     {
         s_NumCells = numCells;
         s_CellSize = cellSize;
-        s_BottomLeft = center - 0.5f * new float3(numCells.x * cellSize.x, 0.0f, numCells.y * cellSize.y) + 0.5f * new float3(0.5f, 0.0f, 0.5f);
+        s_BottomLeft = center - 0.5f * new float3(numCells.x * cellSize.x, 0.0f, numCells.y * cellSize.y) + new float3(0.5f, 0.0f, 0.5f);
     }
 
     public static int2 NumCells => s_NumCells;
