@@ -41,7 +41,6 @@ public class MissileSpawnerSystem : ComponentSystem
 
         for (int turretIdx = 0; turretIdx < m_turretData.Length; ++turretIdx)
         {
-            Debug.Log(m_turretData.State[turretIdx].TimeSinceLastFire);
             if (m_turretData.State[turretIdx].TimeSinceLastFire >= 1.0f)
             {
                 ComponentTypes.TurretHeadState stateCopy = m_turretData.State[turretIdx];
@@ -53,6 +52,8 @@ public class MissileSpawnerSystem : ComponentSystem
                 PostUpdateCommands.SetComponent(new Position {Value = new Vector3(bodyPosition.Value.x, bodyPosition.Value.y, bodyPosition.Value.z) + m_turretData.State[turretIdx].Translation});
                 PostUpdateCommands.SetComponent(new MoveSpeed {speed = 5.0f});
                 PostUpdateCommands.SetComponent(new Rotation {Value = Quaternion.Euler(0.0f, stateCopy.Angle, 0.0f)});
+                PostUpdateCommands.SetComponent(new ComponentTypes.MissileState {BirthTime = Time.time});
+
                 PostUpdateCommands.AddSharedComponent(Bootstrap.MissileLook);
 
                 stateCopy.TimeSinceLastFire = 0.0f;

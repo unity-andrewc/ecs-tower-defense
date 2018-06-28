@@ -66,5 +66,6 @@ namespace ComponentTypes
 
 	public struct MissileState : IComponentData
 	{
+		public float BirthTime;
 	}
 }
