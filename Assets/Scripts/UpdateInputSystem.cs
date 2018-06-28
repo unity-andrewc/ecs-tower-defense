@@ -39,7 +39,7 @@ public class UpdateInputSystem : ComponentSystem
                 if (Input.GetMouseButtonDown(0))
                 {
                     var em = PostUpdateCommands;
-                    if (hit.collider.tag.Equals("Floor"))
+                    if (hit.collider.tag.Equals("Floor") && PathingSystem.TryFindPathWithBlocker(gridIndex))
                     {
                         InstanceTurret(gridWorldPos);
 //                        Debug.Log("Grid Index: " + gridIndex);

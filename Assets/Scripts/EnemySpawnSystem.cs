@@ -36,7 +36,7 @@ public class EnemySpawnSystem : ComponentSystem
         
         var oldState = Random.state;
         Random.InitState(0xaf77);
-        entityManager.SetComponentData(stateEntity, new WaveSpawn { Cooldown = Constants.Enemy.WAVE_COOLDOWN , SpawnedEnemyCount = 0});
+        entityManager.SetComponentData(stateEntity, new WaveSpawn { Cooldown = Constants.Enemy.WAVE_COOLDOWN , SpawnedEnemyCount = 3});
         entityManager.SetComponentData(stateEntity, new EnemySpawn { Cooldown = 0.0f });
         Random.state = oldState;
     }
@@ -64,6 +64,8 @@ public class EnemySpawnSystem : ComponentSystem
         }
         else
         {
+            m_EnemySpawnState.Enemy[0] = new EnemySpawn { Cooldown = 0f };
+            
             var cooldown = Mathf.Max(0.0f, wave.Cooldown - Time.deltaTime);
             bool spawn = cooldown <= 0.0f;
 

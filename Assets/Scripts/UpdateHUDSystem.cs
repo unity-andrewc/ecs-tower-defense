@@ -4,19 +4,27 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 [AlwaysUpdateSystem]
 public class UpdateHUDSystem : ComponentSystem
 {
-    public struct PlayerData
+    struct EnemySpawnState
     {
         public int Length;
-        [ReadOnly] public EntityArray Entity;
+        public ComponentDataArray<EnemySpawn> Enemy;
+    }
+    
+    struct WaveSpawnState
+    {
+        public int Length;
+        public ComponentDataArray<WaveSpawn> Wave;
     }
 
-    [Inject] PlayerData m_Players;
+    [Inject] EnemySpawnState m_EnemySpawnState;
+    [Inject] WaveSpawnState m_WaveSpawnState;
+
+    private static Image waveFillImage;
 
     public static void SetupGameObjects(EntityManager entityManager)
     {
@@ -28,19 +36,31 @@ public class UpdateHUDSystem : ComponentSystem
             {
                 button.onClick.AddListener(() =>
                 {
-                    TurretButtonListener(entityManager, button.gameObject.transform.position);
+                    TurretButtonListener(entityManager);
                 });
+            }
+        }
+        
+        var waveInfoContainer = GameObject.Find("WaveInfo");
+        for (int i = 0; i < waveInfoContainer.transform.childCount; i++)
+        {
+            var image = waveInfoContainer.transform.GetChild(i).GetComponent<Image>();
+            if (image != null)
+            {
+                waveFillImage = image.transform.GetChild(i).GetComponent<Image>();
+                if (waveFillImage != null)
+                {
+                    waveFillImage.fillAmount = 1.0f;
+                }
             }
         }
     }
 
-    private static void TurretButtonListener(EntityManager entityManager, float3 position)
+    private static void TurretButtonListener(EntityManager entityManager)
     {
         var InputTurretBodyArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(ComponentTypes.TurretBodyState), typeof(ComponentTypes.InputState));
         var InputTurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.InputState));
-//        Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
-//        //position = new Vector3(0.0f, 0.0f, -2.0f);
-        position = new float3(-9.5f, 0.0f, 0.5f);
+        var position = new float3(-9.5f, 0.0f, 0.5f);
         Matrix4x4 trans = Matrix4x4.Translate(position);
         Entity turretBody = entityManager.CreateEntity(InputTurretBodyArchetype);
         Entity turretHead = entityManager.CreateEntity(InputTurretHeadArchetype);
@@ -55,14 +75,20 @@ public class UpdateHUDSystem : ComponentSystem
         entityManager.SetComponentData(turretHead, new LocalPosition {Value = new Vector3(0.0f, 0.6128496f, 0.0f)});
         entityManager.SetComponentData(turretHead, new LocalRotation {Value = quaternion.identity});
         entityManager.SetComponentData(turretHead, new TransformParent {Value = turretBody});
-//        entityManager.SetComponentData(turretHead, new Input());
         entityManager.AddSharedComponentData(turretHead, Bootstrap.TurretHeadLook);
     }
 
     protected override void OnUpdate()
     {
-        // TODO : implement UI updates here
-        // 
+        var wave = m_WaveSpawnState.Wave[0];
+        if (wave.SpawnedEnemyCount >= 3)
+        {
+            waveFillImage.fillAmount = wave.Cooldown / Constants.Enemy.WAVE_COOLDOWN;
+        }
+        else
+        {
+            waveFillImage.fillAmount = 1.0f;
+        }
     }
 
 }
