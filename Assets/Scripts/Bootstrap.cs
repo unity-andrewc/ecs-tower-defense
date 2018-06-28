@@ -65,7 +65,7 @@ public sealed class Bootstrap
         entityManager.SetComponentData(goalPoint, new EnemyGoalPoint { GridIndex = new int2(0, 10) });
  
         playerDataEntity = entityManager.CreateEntity(PlayerDataArchetype);
-        entityManager.SetComponentData(playerDataEntity, new PlayerSessionData {CurrencyAmount = 10, Score = 0, Health = 1, gameState = GameState.START});
+        entityManager.SetComponentData(playerDataEntity, new PlayerSessionData {CurrencyAmount = 10, Score = 0, Health = 10, gameState = GameState.START});
         
         UpdateHUDSystem.SetupGameObjects(World.Active.GetOrCreateManager<EntityManager>());
     }
