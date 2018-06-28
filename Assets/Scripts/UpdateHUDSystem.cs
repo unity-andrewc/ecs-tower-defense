@@ -1,4 +1,5 @@
 ﻿using ComponentTypes;
+using TMPro;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -20,11 +21,19 @@ public class UpdateHUDSystem : ComponentSystem
         public int Length;
         public ComponentDataArray<WaveSpawn> Wave;
     }
+    
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<ComponentTypes.PlayerSessionData> Player;
+    }
 
     [Inject] EnemySpawnState m_EnemySpawnState;
     [Inject] WaveSpawnState m_WaveSpawnState;
+    [Inject] PlayerData m_PlayerData;
 
     private static Image waveFillImage;
+    private static TextMeshProUGUI currencyAmount;
 
     public static void SetupGameObjects(EntityManager entityManager)
     {
@@ -52,6 +61,16 @@ public class UpdateHUDSystem : ComponentSystem
                 {
                     waveFillImage.fillAmount = 1.0f;
                 }
+            }
+        }
+        
+        var currencyInfoContainer = GameObject.Find("CurrencyInfo");
+        for (int i = 0; i < currencyInfoContainer.transform.childCount; i++)
+        {
+            var text = currencyInfoContainer.transform.GetChild(i).GetComponent<TextMeshProUGUI>();
+            if (text != null)
+            {
+                currencyAmount = text;
             }
         }
     }
@@ -89,6 +108,8 @@ public class UpdateHUDSystem : ComponentSystem
         {
             waveFillImage.fillAmount = 1.0f;
         }
+
+        currencyAmount.text = m_PlayerData.Player[0].CurrencyAmount.ToString();
     }
 
 }

@@ -68,4 +68,9 @@ namespace ComponentTypes
 	{
 		public float BirthTime;
 	}
+
+	public struct PlayerSessionData : IComponentData
+	{
+		public int CurrencyAmount;
+	}
 }

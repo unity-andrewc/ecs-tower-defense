@@ -4,6 +4,7 @@ using Unity.Transforms;
 using UnityEngine;
 using System.ComponentModel.Design;
 using System.Runtime.CompilerServices;
+using ComponentTypes;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -28,11 +29,19 @@ public class MissileImpactSystem : ComponentSystem
         public ComponentDataArray<Position> Positions;
         public ComponentDataArray<ComponentTypes.Enemy> State;
     }
+    
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<PlayerSessionData> Player;
+    }
 
     [Inject]
     private MissileData m_missileData;
     [Inject]
     private EnemyData m_enemyData;
+    
+    [Inject] PlayerData m_PlayerData;
 
     protected override void OnUpdate()
     {
@@ -48,6 +57,12 @@ public class MissileImpactSystem : ComponentSystem
 
                 if (math.length(enemyPos - missilePos) < 0.5f)
                 {
+                    for (int i = 0; i < m_PlayerData.Player.Length; i++)
+                    {
+                        var playerData = m_PlayerData.Player[i];
+                        playerData.CurrencyAmount++;
+                        m_PlayerData.Player[i] = playerData;
+                    }
                     PostUpdateCommands.DestroyEntity(m_missileData.InputEntities[mIdx]);
                     PostUpdateCommands.DestroyEntity(m_enemyData.InputEntities[eIdx]);
                 }

@@ -16,6 +16,7 @@ public sealed class Bootstrap
     public static EntityArchetype SpawnPointArchetype;
     public static EntityArchetype GoalPointArchetype;
     public static EntityArchetype MissileArchetype;
+    public static EntityArchetype PlayerDataArchetype; // TODO : add score in here
 
     public static MeshInstanceRenderer TurretBodyLook;
     public static MeshInstanceRenderer TurretHeadLook;
@@ -42,6 +43,7 @@ public sealed class Bootstrap
         GoalPointArchetype = entityManager.CreateArchetype(typeof(EnemyGoalPoint));
 
         MissileArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(MoveSpeed), typeof(MoveForward), typeof(MissileState));
+        PlayerDataArchetype = entityManager.CreateArchetype(typeof(PlayerSessionData));
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -67,6 +69,9 @@ public sealed class Bootstrap
         entityManager.SetComponentData(spawnPoint, new EnemySpawnPoint { GridIndex = new int2(19, 10) });
         Entity goalPoint = entityManager.CreateEntity(GoalPointArchetype);
         entityManager.SetComponentData(goalPoint, new EnemyGoalPoint { GridIndex = new int2(0, 10) });
+        
+        Entity curencyEntity = entityManager.CreateEntity(PlayerDataArchetype);
+        entityManager.SetComponentData(curencyEntity, new PlayerSessionData {CurrencyAmount = 10});
         
         NewGame();
     }
