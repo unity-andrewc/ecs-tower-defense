@@ -63,6 +63,7 @@ public class MissileImpactSystem : ComponentSystem
                     {
                         var playerData = m_PlayerData.Player[i];
                         playerData.CurrencyAmount++;
+                        playerData.Score += 10 ;
                         m_PlayerData.Player[i] = playerData;
                     }
                     PostUpdateCommands.DestroyEntity(m_missileData.InputEntities[mIdx]);

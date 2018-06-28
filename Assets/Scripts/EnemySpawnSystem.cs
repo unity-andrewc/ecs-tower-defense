@@ -9,12 +9,14 @@ public class EnemySpawnSystem : ComponentSystem
     struct EnemySpawnState
     {
         public int Length;
+        public EntityArray InputEntities;
         public ComponentDataArray<EnemySpawn> Enemy;
     }
     
     struct WaveSpawnState
     {
         public int Length;
+        public EntityArray InputEntities;
         public ComponentDataArray<WaveSpawn> Wave;
     }
     
@@ -23,7 +25,14 @@ public class EnemySpawnSystem : ComponentSystem
         public int Length;
         public ComponentDataArray<EnemySpawnPoint> SpawnPoint;
     }
-
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<PlayerSessionData> Player;
+    }
+    
+    [Inject] PlayerData m_PlayerData;
+    
     [Inject] EnemySpawnState m_EnemySpawnState;
     [Inject] WaveSpawnState m_WaveSpawnState;
     [Inject] SpawnPointState m_SpawnPointState;
@@ -111,19 +120,7 @@ public class EnemySpawnSystem : ComponentSystem
         PostUpdateCommands.SetComponent(new Position { Value = spawnPosition });
         PostUpdateCommands.SetComponent(new Rotation { Value = quaternion.identity });
         PostUpdateCommands.SetComponent(new Enemy { Speed = 3.7f });
-        PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1BodyLook);
-        
-//        // TODO : We may have one mesh enemy
-//        // TODO : We may adjust the position of the head of the enemy
-//
-//        trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, Vector3.one);
-//        PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
-//        PostUpdateCommands.SetComponent(new TransformMatrix {Value = trs});
-//        PostUpdateCommands.SetComponent(new Position {Value = spawnPosition});
-//        PostUpdateCommands.SetComponent(new Rotation {Value = quaternion.identity});
-//        PostUpdateCommands.SetComponent(default(Enemy));
-//        PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
-        
+        PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1BodyLook);  
         wave.RandomState = Random.state;
 
         m_WaveSpawnState.Wave[0] = wave;

@@ -73,6 +73,13 @@ public class PathingSystem : ComponentSystem
     }
     [Inject] private GoalPointData m_GoalPointData;
 
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<ComponentTypes.PlayerSessionData> Player;
+    }
+    [Inject] PlayerData m_PlayerData;
+    
     private GridBitfield m_PreviousBlockedTerrain;
 
     private static float CalcHeurisitic(int2 lhs, int2 rhs)
@@ -330,6 +337,16 @@ public class PathingSystem : ComponentSystem
 
         for (int danglingEnemyIndex = 0; danglingEnemyIndex < m_DanglingEnemyData.Length; ++danglingEnemyIndex)
         {
+            if (m_PlayerData.Player[0].gameState.Equals(GameState.PLAYING))
+            {
+                for (int i = 0; i < m_PlayerData.Player.Length; i++)
+                {
+                    var playerData = m_PlayerData.Player[i];
+                    playerData.Health--;
+                    m_PlayerData.Player[i] = playerData;
+                }                
+            }
+            
             m_PathManager.RemovePath(m_DanglingEnemyData.EnemyStates[danglingEnemyIndex].PathId);
             entityManager.RemoveComponent<EnemyState>(m_DanglingEnemyData.Entities[danglingEnemyIndex]);
         }

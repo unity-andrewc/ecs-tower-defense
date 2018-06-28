@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [AlwaysUpdateSystem]
+[UpdateAfter(typeof(EndGameSystem))]
 public class UpdateHUDSystem : ComponentSystem
 {
     struct EnemySpawnState
@@ -33,6 +34,8 @@ public class UpdateHUDSystem : ComponentSystem
 
     private static Image waveFillImage;
     private static TextMeshProUGUI currencyAmount;
+    private static TextMeshProUGUI playerScore;
+    private static TextMeshProUGUI playerHealth;
     private static GameObject ingameMenu;
     private static GameObject mainMenu;
 
@@ -75,6 +78,26 @@ public class UpdateHUDSystem : ComponentSystem
             }
         }
         
+        var scoreInfoContainer = GameObject.Find("ScoreInfo");
+        for (int i = 0; i < scoreInfoContainer.transform.childCount; i++)
+        {
+            var text = scoreInfoContainer.transform.GetChild(i).GetComponent<TextMeshProUGUI>();
+            if (text != null)
+            {
+                playerScore = text;
+            }
+        }
+        
+        var healthInfoContainer = GameObject.Find("HealthInfo");
+        for (int i = 0; i < healthInfoContainer.transform.childCount; i++)
+        {
+            var text = healthInfoContainer.transform.GetChild(i).GetComponent<TextMeshProUGUI>();
+            if (text != null)
+            {
+                playerHealth = text;
+            }
+        }
+        
         var playButton = GameObject.Find("PlayButton");
         ingameMenu = GameObject.Find("InGameMenu");
         mainMenu = GameObject.Find("MainMenu");
@@ -82,9 +105,7 @@ public class UpdateHUDSystem : ComponentSystem
         {
             playButton.GetComponent<Button>().onClick.AddListener(()=>
             {
-                mainMenu.gameObject.SetActive(false);
                 Bootstrap.NewGame();
-                ingameMenu.gameObject.SetActive(true);
             });
         }
     }
@@ -113,7 +134,23 @@ public class UpdateHUDSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        if (m_WaveSpawnState.Length <= 0)
+        switch (m_PlayerData.Player[0].gameState)
+        {
+             case GameState.START:
+                 mainMenu.gameObject.SetActive(true);
+                 ingameMenu.gameObject.SetActive(false);
+                 break;
+             case GameState.PLAYING:
+                 mainMenu.gameObject.SetActive(false);
+                 ingameMenu.gameObject.SetActive(true);
+                 break;
+             case GameState.END_GAME:
+                 mainMenu.gameObject.SetActive(true);
+                 ingameMenu.gameObject.SetActive(false);
+                 break;
+        }
+        
+        if (m_WaveSpawnState.Length <= 0 || m_PlayerData.Length <= 0)
         {
             return;
         }
@@ -129,6 +166,8 @@ public class UpdateHUDSystem : ComponentSystem
         }
 
         currencyAmount.text = m_PlayerData.Player[0].CurrencyAmount.ToString();
+        playerScore.text = m_PlayerData.Player[0].Score.ToString();
+        playerHealth.text = m_PlayerData.Player[0].Health.ToString();
     }
 
 }

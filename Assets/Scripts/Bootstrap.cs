@@ -25,6 +25,8 @@ public sealed class Bootstrap
     public static MeshInstanceRenderer Enemy1BodyLook;
     public static MeshInstanceRenderer MissileLook;
 
+    private static Entity playerDataEntity;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void OnBeforeSceneLoadRuntimeMethod()
     {
@@ -62,8 +64,8 @@ public sealed class Bootstrap
         Entity goalPoint = entityManager.CreateEntity(GoalPointArchetype);
         entityManager.SetComponentData(goalPoint, new EnemyGoalPoint { GridIndex = new int2(0, 10) });
  
-        Entity curencyEntity = entityManager.CreateEntity(PlayerDataArchetype);
-        entityManager.SetComponentData(curencyEntity, new PlayerSessionData {CurrencyAmount = 10});
+        playerDataEntity = entityManager.CreateEntity(PlayerDataArchetype);
+        entityManager.SetComponentData(playerDataEntity, new PlayerSessionData {CurrencyAmount = 10, Score = 0, Health = 1, gameState = GameState.START});
         
         UpdateHUDSystem.SetupGameObjects(World.Active.GetOrCreateManager<EntityManager>());
     }
@@ -72,10 +74,31 @@ public sealed class Bootstrap
     static void OnRuntimeMethodLoad()
     {
     }
+    
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<PlayerSessionData> Player;
+    }
+    
+    [Inject] static PlayerData m_PlayerData;
 
     public static void NewGame()
     {
         EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
+        
+        var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+
+        var data = entityManager.GetComponentData<PlayerSessionData>(playerDataEntity);
+
+        data.gameState = GameState.PLAYING;
+        
+        entityManager.SetComponentData(playerDataEntity, data);
+
+//        var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+
+//        Entity curencyEntity = entityManager.CreateEntity(PlayerDataArchetype);
+//        entityManager.SetComponentData(curencyEntity, new PlayerSessionData {CurrencyAmount = 10, Score = 0, Health = 10});
     }
 
 //    public static void InstanceTurret()

@@ -73,5 +73,15 @@ namespace ComponentTypes
 	public struct PlayerSessionData : IComponentData
 	{
 		public int CurrencyAmount;
+		public int Score;
+		public int Health;
+		public GameState gameState;
+	}
+
+	public enum GameState
+	{
+		START,
+		PLAYING,
+		END_GAME
 	}
 }
