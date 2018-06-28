@@ -46,6 +46,7 @@ namespace ComponentTypes
 	{
 		public float Cooldown;
 		public float SpawnedEnemyCount;
+		public int SpawnedWaveCount;
 		public Random.State RandomState;
 	}
 

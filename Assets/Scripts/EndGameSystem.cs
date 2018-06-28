@@ -23,6 +23,15 @@ public class EndGameSystem : ComponentSystem
 
     [Inject] PositionState m_PosEntities;
     
+    struct WaveSpawnState
+    {
+        public int Length;
+        public EntityArray InputEntities;
+        public ComponentDataArray<WaveSpawn> Wave;
+    }
+    
+    [Inject] WaveSpawnState m_WaveSpawnState;
+    
     protected override void OnUpdate()
     {
         if (m_PlayerData.Length <= 0)
@@ -32,21 +41,28 @@ public class EndGameSystem : ComponentSystem
 
         if (m_PlayerData.Player[0].Health <= 0)
         {
-//            for (int i = 0; i < m_PosEntities.Length; i++)
-//            {
-//                var entity = m_PosEntities.Entities[i];
-//                PostUpdateCommands.DestroyEntity(entity);
-//            }
-//            
+            for (int i = m_PosEntities.Length-1; i >= 0; i--)
+            {
+                var entity = m_PosEntities.Entities[i];
+                PostUpdateCommands.DestroyEntity(entity);
+            }
+            
             var playerData = m_PlayerData.Player[0];
             playerData.gameState = GameState.END_GAME;
             playerData.Health = 10;
             playerData.Score = 0;
             playerData.CurrencyAmount = 10;
             m_PlayerData.Player[0] = playerData;
-        }
+            
+            
+            var wave = m_WaveSpawnState.Wave[0];
 
+            wave.SpawnedEnemyCount = 3;
+            wave.SpawnedWaveCount = 0;
+            wave.Cooldown = Constants.Enemy.WAVE_COOLDOWN;
         
+            m_WaveSpawnState.Wave[0] = wave;
+        }
     }
 
 }

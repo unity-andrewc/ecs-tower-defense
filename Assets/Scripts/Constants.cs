@@ -4,7 +4,7 @@ public static class Constants
 {
     public static class Enemy
     {
-        public static float COOLDOWN = 2.5f;
+        public static float COOLDOWN = 0.5f;
         //TODO : this could be changing in order to make game more difficult?
         public static float WAVE_COOLDOWN = 5.0f;
 

@@ -45,7 +45,7 @@ public class EnemySpawnSystem : ComponentSystem
         
         var oldState = Random.state;
         Random.InitState(0xaf77);
-        entityManager.SetComponentData(stateEntity, new WaveSpawn { Cooldown = Constants.Enemy.WAVE_COOLDOWN , SpawnedEnemyCount = 3});
+        entityManager.SetComponentData(stateEntity, new WaveSpawn { Cooldown = Constants.Enemy.WAVE_COOLDOWN , SpawnedEnemyCount = 3, SpawnedWaveCount = 0});
         entityManager.SetComponentData(stateEntity, new EnemySpawn { Cooldown = 0.0f });
         Random.state = oldState;
     }
@@ -53,13 +53,13 @@ public class EnemySpawnSystem : ComponentSystem
     
     protected override void OnUpdate()
     {
-        if (m_WaveSpawnState.Length <= 0)
+        if (m_PlayerData.Length < 0 || !m_PlayerData.Player[0].gameState.Equals(GameState.PLAYING))
         {
             return;
         }
         
         var wave = m_WaveSpawnState.Wave[0];
-        if (wave.SpawnedEnemyCount < 3)
+        if (wave.SpawnedEnemyCount < wave.SpawnedWaveCount + 2)
         {
             var cooldown = Mathf.Max(0.0f, m_EnemySpawnState.Enemy[0].Cooldown - Time.deltaTime);
             bool spawn = cooldown <= 0.0f;
@@ -98,6 +98,7 @@ public class EnemySpawnSystem : ComponentSystem
         var wave = m_WaveSpawnState.Wave[0];
 
         wave.SpawnedEnemyCount = 0;
+        wave.SpawnedWaveCount++;
         wave.Cooldown = Constants.Enemy.WAVE_COOLDOWN;
         
         m_WaveSpawnState.Wave[0] = wave;
