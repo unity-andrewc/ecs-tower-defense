@@ -15,6 +15,7 @@ public sealed class Bootstrap
     public static EntityArchetype Enemy1Archetype;
     public static EntityArchetype SpawnPointArchetype;
     public static EntityArchetype GoalPointArchetype;
+    public static EntityArchetype MissileArchetype;
 
     public static MeshInstanceRenderer TurretBodyLook;
     public static MeshInstanceRenderer TurretHeadLook;
@@ -23,6 +24,7 @@ public sealed class Bootstrap
     public static MeshInstanceRenderer Enemy1BodyLook;
     public static MeshInstanceRenderer Enemy1HeadLook;
     public static MeshInstanceRenderer TestEnemyLook;
+    public static MeshInstanceRenderer MissileLook;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void OnBeforeSceneLoadRuntimeMethod()
@@ -38,6 +40,8 @@ public sealed class Bootstrap
 
         SpawnPointArchetype = entityManager.CreateArchetype(typeof(EnemySpawnPoint));
         GoalPointArchetype = entityManager.CreateArchetype(typeof(EnemyGoalPoint));
+
+        MissileArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(MoveSpeed), typeof(MoveForward), typeof(MissileState));
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -53,6 +57,8 @@ public sealed class Bootstrap
         
         TestEnemyLook = GetLookFromPrototype("TestEnemy");
         
+        MissileLook = GetLookFromPrototype("missileproto");
+
         EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
         UpdateHUDSystem.SetupGameObjects(World.Active.GetOrCreateManager<EntityManager>());
         
@@ -80,19 +86,15 @@ public sealed class Bootstrap
 
         Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
         position += new Vector3(0.5f, 0.0f, 0.5f);
-        Matrix4x4 trans = Matrix4x4.Translate(position);
 
         Vector3 headPosition = position + new Vector3(0.0f, 0.6128496f, 0.0f);
         Vector3 gun1Position = new Vector3(0.08563034f, 0.08383693f, 0.327976f);
         Vector3 gun2Position = new Vector3(-0.08563034f, 0.08383693f, 0.327976f);
-        float rotateAngle = Random.Range(0.0f, 360.0f);
 
         Entity turretBody = entityManager.CreateEntity(TurretBodyArchetype);
         Entity turretHead = entityManager.CreateEntity(TurretHeadArchetype);
         Entity turretGun1 = entityManager.CreateEntity(TurretGun1Archetype);
         Entity turretGun2 = entityManager.CreateEntity(TurretGun2Archetype);
-
-        Matrix4x4 world = trans;
 
         entityManager.SetComponentData(turretBody, new TransformMatrix {Value = Matrix4x4.identity});
         entityManager.SetComponentData(turretBody, new Position {Value = position});
@@ -103,6 +105,7 @@ public sealed class Bootstrap
         entityManager.SetComponentData(turretHead, new LocalPosition {Value = new Vector3(0.0f, 0.6128496f, 0.0f)});
         entityManager.SetComponentData(turretHead, new LocalRotation {Value = quaternion.identity});
         entityManager.SetComponentData(turretHead, new TransformParent {Value = turretBody});
+        entityManager.SetComponentData(turretHead, new TurretHeadState {TargetAngle = 0.0f, Angle = 0.0f, Translation = new Vector3(), TimeSinceLastFire = 1.0f});
         entityManager.AddSharedComponentData(turretHead, TurretHeadLook);
 
         entityManager.SetComponentData(turretGun1, new TransformMatrix {Value = Matrix4x4.identity});

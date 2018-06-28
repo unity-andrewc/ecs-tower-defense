@@ -64,7 +64,8 @@ public class TurretSystem : ComponentSystem
             }
 
             ComponentTypes.TurretHeadState tempState = m_data.State[idx];
-
+            tempState.TimeSinceLastFire += Time.deltaTime;
+            
             float delta = tempState.TargetAngle - tempState.Angle;
 
             float rotSpeed = 45.0f;
@@ -106,7 +107,6 @@ public class TurretSystem : ComponentSystem
                     tempState.Angle += adjustment;
                 }
             }
-
 
             if (tempState.Angle < 0.0f)
                 tempState.Angle += 360.0f;

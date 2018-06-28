@@ -13,6 +13,7 @@ namespace ComponentTypes
 		public float TargetAngle;
 		public float Angle;
 		public Vector3 Translation;
+		public float TimeSinceLastFire;
 	}
 
 	public struct TurretGun1State : IComponentData
@@ -60,6 +61,10 @@ namespace ComponentTypes
     }
 	
 	public struct InputState : IComponentData
+	{
+	}
+
+	public struct MissileState : IComponentData
 	{
 	}
 }
