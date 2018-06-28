@@ -104,7 +104,7 @@ public class EnemySpawnSystem : ComponentSystem
         PostUpdateCommands.SetComponent(new Position { Value = spawnPosition });
         PostUpdateCommands.SetComponent(new Rotation { Value = quaternion.identity });
         PostUpdateCommands.SetComponent(new Enemy { Speed = 3.7f });
-        PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
+        PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1BodyLook);
         
 //        // TODO : We may have one mesh enemy
 //        // TODO : We may adjust the position of the head of the enemy

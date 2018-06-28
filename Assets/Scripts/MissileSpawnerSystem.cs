@@ -13,13 +13,6 @@ using Unity.Transforms2D;
 
 public class MissileSpawnerSystem : ComponentSystem
 {
-    public struct MissileData
-    {
-        public int Length;
-        public ComponentDataArray<Position> Positions;
-        public ComponentDataArray<ComponentTypes.MissileState> State;
-    }
-
     public struct TurretData
     {
         public int Length;
@@ -28,9 +21,6 @@ public class MissileSpawnerSystem : ComponentSystem
         public ComponentDataArray<LocalPosition> Positions;
         public ComponentDataArray<ComponentTypes.TurretHeadState> State;        
     }
-
-    [Inject]
-    private MissileData m_missileData;
 
     [Inject]
     private TurretData m_turretData;
@@ -49,7 +39,7 @@ public class MissileSpawnerSystem : ComponentSystem
                 Position bodyPosition = manager.GetComponentData<Position>(body);
 
                 PostUpdateCommands.CreateEntity(Bootstrap.MissileArchetype);
-                PostUpdateCommands.SetComponent(new Position {Value = new Vector3(bodyPosition.Value.x, bodyPosition.Value.y, bodyPosition.Value.z) + m_turretData.State[turretIdx].Translation});
+                PostUpdateCommands.SetComponent(new Position {Value = new Vector3(bodyPosition.Value.x, bodyPosition.Value.y, bodyPosition.Value.z) + new Vector3(m_turretData.Positions[turretIdx].Value.x, m_turretData.Positions[turretIdx].Value.y, m_turretData.Positions[turretIdx].Value.z)});
                 PostUpdateCommands.SetComponent(new MoveSpeed {speed = 10.0f});
                 PostUpdateCommands.SetComponent(new Rotation {Value = Quaternion.Euler(0.0f, stateCopy.Angle, 0.0f)});
                 PostUpdateCommands.SetComponent(new ComponentTypes.MissileState {BirthTime = Time.time});

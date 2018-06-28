@@ -22,8 +22,6 @@ public sealed class Bootstrap
     public static MeshInstanceRenderer TurretGun1Look;
     public static MeshInstanceRenderer TurretGun2Look;
     public static MeshInstanceRenderer Enemy1BodyLook;
-    public static MeshInstanceRenderer Enemy1HeadLook;
-    public static MeshInstanceRenderer TestEnemyLook;
     public static MeshInstanceRenderer MissileLook;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -53,10 +51,7 @@ public sealed class Bootstrap
         TurretGun2Look = GetLookFromPrototype("gun2proto");
 
         Enemy1BodyLook = GetLookFromPrototype("EnemyBodyProto");
-        Enemy1HeadLook = GetLookFromPrototype("EnemyHeadProto");
-        
-        TestEnemyLook = GetLookFromPrototype("TestEnemy");
-        
+                
         MissileLook = GetLookFromPrototype("missileproto");
 
         EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
