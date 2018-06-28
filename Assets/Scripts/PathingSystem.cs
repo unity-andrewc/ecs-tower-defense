@@ -10,7 +10,7 @@ public class PathingSystem : ComponentSystem
 {
     public PathingSystem()
     {
-        Grid.Configure(new int2(20, 20), new float2(1.0f, 1.0f), new float3(0.0f, 0.0f, 0.0f));
+        Grid.Configure(new int2(24, 20), new float2(1.0f, 1.0f), new float3(0.0f, 0.0f, 0.0f));
 
         m_PathManager = new PathManager();
     }

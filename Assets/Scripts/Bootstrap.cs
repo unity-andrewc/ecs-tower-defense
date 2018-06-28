@@ -64,7 +64,7 @@ public sealed class Bootstrap
         
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
         Entity spawnPoint = entityManager.CreateEntity(SpawnPointArchetype);
-        entityManager.SetComponentData(spawnPoint, new EnemySpawnPoint { GridIndex = new int2(19, 10) });
+        entityManager.SetComponentData(spawnPoint, new EnemySpawnPoint { GridIndex = new int2(23, 10) });
         Entity goalPoint = entityManager.CreateEntity(GoalPointArchetype);
         entityManager.SetComponentData(goalPoint, new EnemyGoalPoint { GridIndex = new int2(0, 10) });
         

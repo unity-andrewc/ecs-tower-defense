@@ -9,6 +9,30 @@ public class GridBitfield
         if ((numInts * 32) < numBits)
             ++numInts;
         m_Bits = new int[numInts];
+
+        for (int x = 0; x < 2; ++x)
+        {
+            for (int y = 0; y < 10; ++y)
+                this[x, y] = true;
+        }
+        
+        for (int x = 0; x < 2; ++x)
+        {
+            for (int y = 11; y < 20; ++y)
+                this[x, y] = true;
+        }
+        
+        for (int x = 22; x < 24; ++x)
+        {
+            for (int y = 0; y < 10; ++y)
+                this[x, y] = true;
+        }
+        
+        for (int x = 22; x < 24; ++x)
+        {
+            for (int y = 11; y < 20; ++y)
+                this[x, y] = true;
+        }
     }
 
     public bool this[int x, int y]
