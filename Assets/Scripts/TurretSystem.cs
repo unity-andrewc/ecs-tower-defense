@@ -25,7 +25,6 @@ public class TurretSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        Debug.Log(m_data.Length);
         for (int idx = 0; idx < m_data.Length; ++idx)
         {
             ComponentTypes.TurretHeadState tempState = m_data.State[idx];

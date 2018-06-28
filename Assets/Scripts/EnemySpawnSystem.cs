@@ -17,9 +17,16 @@ public class EnemySpawnSystem : ComponentSystem
         public int Length;
         public ComponentDataArray<WaveSpawn> Wave;
     }
+    
+    struct SpawnPointState
+    {
+        public int Length;
+        public ComponentDataArray<EnemySpawnPoint> SpawnPoint;
+    }
 
     [Inject] EnemySpawnState m_EnemySpawnState;
     [Inject] WaveSpawnState m_WaveSpawnState;
+    [Inject] SpawnPointState m_SpawnPointState;
 
 
     public static void SetupComponentData(EntityManager entityManager)
@@ -87,15 +94,14 @@ public class EnemySpawnSystem : ComponentSystem
         Random.state = wave.RandomState;
         wave.SpawnedEnemyCount++;
         
-        Debug.Log("Spawn Enemy");
         float3 spawnPosition = GetSpawnLocation();
         var trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, Vector3.one);
         
         PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
-        PostUpdateCommands.SetComponent(new TransformMatrix {Value = trs});
-        PostUpdateCommands.SetComponent(new Position {Value = spawnPosition});
-        PostUpdateCommands.SetComponent(new Rotation {Value = quaternion.identity});
-        PostUpdateCommands.SetComponent(default(Enemy));
+        PostUpdateCommands.SetComponent(new TransformMatrix { Value = trs });
+        PostUpdateCommands.SetComponent(new Position { Value = spawnPosition });
+        PostUpdateCommands.SetComponent(new Rotation { Value = quaternion.identity });
+        PostUpdateCommands.SetComponent(new Enemy { Speed = 3.7f });
         PostUpdateCommands.AddSharedComponent(Bootstrap.TestEnemyLook);
         
 //        // TODO : We may have one mesh enemy
@@ -116,13 +122,8 @@ public class EnemySpawnSystem : ComponentSystem
         
     }
 
-    //TODO : it shouldn't be hardcoded?
     float3 GetSpawnLocation()
     {
-        float3 position = new float3(10.0f, 0.0f, 0.0f);
-        position += new float3(0.5f, 0.0f, 0.5f);
-
-        return position;
+        return Grid.ConvertToWorldPosition(m_SpawnPointState.SpawnPoint[0].GridIndex);
     }
-    
 }

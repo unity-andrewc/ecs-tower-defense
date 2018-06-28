@@ -13,6 +13,8 @@ public sealed class Bootstrap
     public static EntityArchetype TurretGun1Archetype;
     public static EntityArchetype TurretGun2Archetype;
     public static EntityArchetype Enemy1Archetype;
+    public static EntityArchetype SpawnPointArchetype;
+    public static EntityArchetype GoalPointArchetype;
 
     public static MeshInstanceRenderer TurretBodyLook;
     public static MeshInstanceRenderer TurretHeadLook;
@@ -31,8 +33,11 @@ public sealed class Bootstrap
         TurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretHeadState));
         TurretGun1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretGun1State));
         TurretGun2Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.TurretGun2State));
-       
+
         Enemy1Archetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(Enemy));
+
+        SpawnPointArchetype = entityManager.CreateArchetype(typeof(EnemySpawnPoint));
+        GoalPointArchetype = entityManager.CreateArchetype(typeof(EnemyGoalPoint));
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -49,6 +54,12 @@ public sealed class Bootstrap
         TestEnemyLook = GetLookFromPrototype("TestEnemy");
         
         EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
+        
+        var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+        Entity spawnPoint = entityManager.CreateEntity(SpawnPointArchetype);
+        entityManager.SetComponentData(spawnPoint, new EnemySpawnPoint { GridIndex = new int2(19, 10) });
+        Entity goalPoint = entityManager.CreateEntity(GoalPointArchetype);
+        entityManager.SetComponentData(goalPoint, new EnemyGoalPoint { GridIndex = new int2(0, 10) });
         
         NewGame();
     }

@@ -29,18 +29,38 @@ namespace ComponentTypes
 	{
 		public Vector3 Translation;
 	}
-	
-	public struct Enemy : IComponentData { }
-	
+
+	public struct Enemy : IComponentData
+    {
+        public float Speed;
+    }
+
+    public struct EnemyState : ISystemStateComponentData
+    {
+        public int PathId;
+    }
+
 	public struct EnemySpawn : IComponentData
 	{
 		public float Cooldown;
 	}
-	
+
 	public struct WaveSpawn : IComponentData
 	{
 		public float Cooldown;
 		public float SpawnedEnemyCount;
 		public Random.State RandomState;
 	}
+
+    // there should only be one of these in any given level
+    public struct EnemySpawnPoint : IComponentData
+    {
+        public int2 GridIndex;
+    }
+    
+    // there should only be one of these in any given level
+    public struct EnemyGoalPoint : IComponentData
+    {
+        public int2 GridIndex;
+    }
 }

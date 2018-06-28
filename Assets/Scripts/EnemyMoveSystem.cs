@@ -17,18 +17,18 @@ public class EnemyMoveSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        for (int i = 0; i < m_State.Length; ++i)
-        {
-            var data = m_State.EnemyPositions[i].Value;
-            
-            var movePosition = new float3(data.x - 0.01f
-                , data.y
-                , data.z);
-
-            data = movePosition;
-            
-            m_State.EnemyPositions[i] = new Position {Value = data};
-        }
+        //for (int i = 0; i < m_State.Length; ++i)
+        //{
+        //    var data = m_State.EnemyPositions[i].Value;
+        //    
+        //    var movePosition = new float3(data.x - 0.01f
+        //        , data.y
+        //        , data.z);
+        //
+        //    data = movePosition;
+        //    
+        //    m_State.EnemyPositions[i] = new Position {Value = data};
+        //}
     }
     
 }
