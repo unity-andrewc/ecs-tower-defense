@@ -57,17 +57,26 @@ public class MissileImpactSystem : ComponentSystem
                 float3 enemyPos = m_enemyData.Positions[eIdx].Value;
                 enemyPos.y = 0.0f;
 
+
                 if (math.length(enemyPos - missilePos) < 1.0f)
                 {
-                    for (int i = 0; i < m_PlayerData.Player.Length; i++)
+                    ComponentTypes.Enemy enemyState = m_enemyData.State[eIdx];
+                    enemyState.Health -= 1;
+
+                    if ( enemyState.Health <= 0)
                     {
-                        var playerData = m_PlayerData.Player[i];
-                        playerData.CurrencyAmount++;
-                        playerData.Score += 10 ;
-                        m_PlayerData.Player[i] = playerData;
+                        for (int i = 0; i < m_PlayerData.Player.Length; i++)
+                        {
+                            var playerData = m_PlayerData.Player[i];
+                            playerData.CurrencyAmount++;
+                            playerData.Score += 10 ;
+                            m_PlayerData.Player[i] = playerData;
+                        }
+                        PostUpdateCommands.DestroyEntity(m_enemyData.InputEntities[eIdx]);
                     }
+
                     PostUpdateCommands.DestroyEntity(m_missileData.InputEntities[mIdx]);
-                    PostUpdateCommands.DestroyEntity(m_enemyData.InputEntities[eIdx]);
+                    m_enemyData.State[eIdx] = enemyState;
                 }
             }
         }
