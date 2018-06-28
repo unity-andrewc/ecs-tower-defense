@@ -6,7 +6,7 @@ public static class Grid
     {
         s_NumCells = numCells;
         s_CellSize = cellSize;
-        s_BottomLeft = center - 0.5f * new float3(numCells.x * cellSize.x, 0.0f, numCells.y * cellSize.y) + new float3(0.5f, 0.0f, 0.5f);
+        s_BottomLeft = center - 0.5f * new float3(numCells.x * cellSize.x, 0.0f, numCells.y * cellSize.y);
     }
 
     public static int2 NumCells => s_NumCells;
@@ -21,7 +21,7 @@ public static class Grid
     public static float3 ConvertToWorldPosition(int2 gridIndex)
     {
         float3 scaledByCellSize = new float3((float)gridIndex.x * s_CellSize.x, 0.0f, (float)gridIndex.y * s_CellSize.y);
-        return scaledByCellSize + s_BottomLeft;
+        return scaledByCellSize + s_BottomLeft + new float3(0.5f * s_CellSize.x, 0.0f, 0.5f * s_CellSize.y);
     }
 
     private static int2 s_NumCells;
