@@ -72,10 +72,6 @@ public sealed class Bootstrap
 
     public static void NewGame()
     {
-        for (int idx = 0; idx < 100; ++idx)
-        {
-//            InstanceTurret();
-        }
     }
 
     public static void InstanceTurret()
@@ -83,7 +79,6 @@ public sealed class Bootstrap
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
         Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
-        //position = new Vector3(0.0f, 0.0f, -2.0f);
         position += new Vector3(0.5f, 0.0f, 0.5f);
         Matrix4x4 trans = Matrix4x4.Translate(position);
 
@@ -127,7 +122,7 @@ public sealed class Bootstrap
     {
         var proto = GameObject.Find(protoName);
         var result = proto.GetComponent<MeshInstanceRendererComponent>().Value;
-        //Object.Destroy(proto);
+        Object.Destroy(proto);
         return result;
     }
 }
