@@ -49,5 +49,30 @@ public class GridBitfield
         bitIndex = overallIndex - arrayIndex * 32;
     }
 
-    int[] m_Bits;
+    public static bool operator==(GridBitfield lhs, GridBitfield rhs)
+    {
+        if ((object)lhs == null && (object)rhs == null)
+            return true;
+
+        if ((object)lhs == null || (object)rhs == null)
+            return false;
+
+        if (lhs.m_Bits.Length != rhs.m_Bits.Length)
+            return false;
+
+        for (int a = 0; a < lhs.m_Bits.Length; ++a)
+        {
+            if (lhs.m_Bits[a] != rhs.m_Bits[a])
+                return false;
+        }
+
+        return true;
+    }
+
+    public static bool operator!=(GridBitfield lhs, GridBitfield rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    private int[] m_Bits;
 }
