@@ -236,6 +236,7 @@ public class PathingSystem : ComponentSystem
                 currentNode = cameFrom[currentNode];
                 path.Add(Grid.ConvertToWorldPosition(currentNode));
             }
+            path.RemoveAt(path.Count - 1);
 
             return path[path.Count - 1];
         }
