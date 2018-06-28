@@ -1,11 +1,11 @@
-﻿using Unity.Collections;
+﻿using ComponentTypes;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Input = ComponentTypes.Input;
 
 [AlwaysUpdateSystem]
 public class UpdateHUDSystem : ComponentSystem
@@ -36,8 +36,8 @@ public class UpdateHUDSystem : ComponentSystem
 
     private static void TurretButtonListener(EntityManager entityManager, float3 position)
     {
-        var InputTurretBodyArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(ComponentTypes.TurretBodyState), typeof(ComponentTypes.Input));
-        var InputTurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.Input));
+        var InputTurretBodyArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(Position), typeof(Rotation), typeof(ComponentTypes.TurretBodyState), typeof(ComponentTypes.InputState));
+        var InputTurretHeadArchetype = entityManager.CreateArchetype(typeof(TransformMatrix), typeof(LocalPosition), typeof(LocalRotation), typeof(TransformParent), typeof(ComponentTypes.InputState));
 //        Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
 //        //position = new Vector3(0.0f, 0.0f, -2.0f);
         position = new float3(-9.5f, 0.0f, 0.5f);
@@ -48,7 +48,7 @@ public class UpdateHUDSystem : ComponentSystem
         entityManager.SetComponentData(turretBody, new TransformMatrix {Value = Matrix4x4.identity});
         entityManager.SetComponentData(turretBody, new Position {Value = position});
         entityManager.SetComponentData(turretBody, new Rotation {Value = quaternion.identity});
-        entityManager.SetComponentData(turretBody, new Input());
+        entityManager.SetComponentData(turretBody, new InputState());
         entityManager.AddSharedComponentData(turretBody, Bootstrap.TurretBodyLook);
 
         entityManager.SetComponentData(turretHead, new TransformMatrix {Value = Matrix4x4.identity});

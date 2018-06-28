@@ -64,6 +64,7 @@ public class PathingSystem : ComponentSystem
     {
         public ComponentDataArray<TurretBodyState> TurretBodies;
         public ComponentDataArray<Position>        Positions;
+        public SubtractiveComponent<InputState>    InputState;
 
         public int Length;
     }

@@ -10,7 +10,7 @@ public class UpdateInputSystem : ComponentSystem
     {
         public int Length;
         public EntityArray InputEntities;
-        public ComponentDataArray<ComponentTypes.Input> Input;
+        public ComponentDataArray<ComponentTypes.InputState> Input;
         public ComponentDataArray<Position> TurretPosition;
     }
     
@@ -18,7 +18,7 @@ public class UpdateInputSystem : ComponentSystem
     {
         public int Length;
         public EntityArray InputEntities;
-        public ComponentDataArray<ComponentTypes.Input> Input;
+        public ComponentDataArray<ComponentTypes.InputState> Input;
         public ComponentDataArray<LocalPosition> TurretHeadPosition;
     }
 

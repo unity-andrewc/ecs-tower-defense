@@ -1,11 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Entities;
-
 using Unity.Mathematics;
-using Unity.Transforms;
-using Unity.Transforms2D;
 
 namespace ComponentTypes
 {
@@ -64,7 +59,7 @@ namespace ComponentTypes
         public int2 GridIndex;
     }
 	
-	public struct Input : IComponentData
+	public struct InputState : IComponentData
 	{
 	}
 }
