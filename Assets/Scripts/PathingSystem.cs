@@ -230,11 +230,11 @@ public class PathingSystem : ComponentSystem
         {
             List<float3> path = m_PathManager.GetPath(enemyState.PathId);
             int2 currentNode = s_Goal;
-            path.Add(Grid.ConvertToWorldPosition(currentNode));
+            path.Add(Grid.ConvertToWorldPosition(currentNode) + new float3(0.0f, 1.0f, 0.0f));
             while (cameFrom.ContainsKey(currentNode))
             {
                 currentNode = cameFrom[currentNode];
-                path.Add(Grid.ConvertToWorldPosition(currentNode));
+                path.Add(Grid.ConvertToWorldPosition(currentNode) + new float3(0.0f, 1.0f, 0.0f));
             }
             path.RemoveAt(path.Count - 1);
 

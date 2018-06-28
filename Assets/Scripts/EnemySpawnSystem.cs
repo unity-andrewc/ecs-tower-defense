@@ -102,6 +102,8 @@ public class EnemySpawnSystem : ComponentSystem
         wave.SpawnedEnemyCount++;
         
         float3 spawnPosition = GetSpawnLocation();
+        spawnPosition += new float3(0.0f, 1.0f, 0.0f);
+        
         var trs = Matrix4x4.TRS(spawnPosition, Quaternion.identity, Vector3.one);
         
         PostUpdateCommands.CreateEntity(Bootstrap.Enemy1Archetype);
