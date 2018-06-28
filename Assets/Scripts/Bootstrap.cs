@@ -54,6 +54,7 @@ public sealed class Bootstrap
         TestEnemyLook = GetLookFromPrototype("TestEnemy");
         
         EnemySpawnSystem.SetupComponentData(World.Active.GetOrCreateManager<EntityManager>());
+        UpdateHUDSystem.SetupGameObjects();
         
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
         Entity spawnPoint = entityManager.CreateEntity(SpawnPointArchetype);
@@ -73,15 +74,16 @@ public sealed class Bootstrap
     {
         for (int idx = 0; idx < 100; ++idx)
         {
-            InstanceTurret();
+//            InstanceTurret();
         }
     }
 
-    private static void InstanceTurret()
+    public static void InstanceTurret()
     {
         var entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
         Vector3 position = new Vector3(Mathf.Floor(Random.Range(-10.0f, 10.0f)), 0.0f, Mathf.Floor(Random.Range(-10.0f, 10.0f)));
+        //position = new Vector3(0.0f, 0.0f, -2.0f);
         position += new Vector3(0.5f, 0.0f, 0.5f);
         Matrix4x4 trans = Matrix4x4.Translate(position);
 
