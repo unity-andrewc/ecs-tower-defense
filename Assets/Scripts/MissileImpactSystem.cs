@@ -57,7 +57,7 @@ public class MissileImpactSystem : ComponentSystem
                 float3 enemyPos = m_enemyData.Positions[eIdx].Value;
                 enemyPos.y = 0.0f;
 
-                if (math.length(enemyPos - missilePos) < 0.5f)
+                if (math.length(enemyPos - missilePos) < 1.0f)
                 {
                     for (int i = 0; i < m_PlayerData.Player.Length; i++)
                     {
