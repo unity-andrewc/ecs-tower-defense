@@ -105,7 +105,7 @@ public sealed class Bootstrap
         entityManager.SetComponentData(turretHead, new LocalPosition {Value = new Vector3(0.0f, 0.6128496f, 0.0f)});
         entityManager.SetComponentData(turretHead, new LocalRotation {Value = quaternion.identity});
         entityManager.SetComponentData(turretHead, new TransformParent {Value = turretBody});
-        entityManager.SetComponentData(turretHead, new TurretHeadState {TargetAngle = 0.0f, Angle = 0.0f, Translation = new Vector3(), TimeSinceLastFire = 1.0f});
+        entityManager.SetComponentData(turretHead, new TurretHeadState {TargetAngle = 0.0f, Angle = 0.0f, Translation = new Vector3(), TimeSinceLastFire = 1.0f, CanFire = 0});
         entityManager.AddSharedComponentData(turretHead, TurretHeadLook);
 
         entityManager.SetComponentData(turretGun1, new TransformMatrix {Value = Matrix4x4.identity});
