@@ -1,6 +1,5 @@
 ﻿using ComponentTypes;
 using TMPro;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -34,6 +33,8 @@ public class UpdateHUDSystem : ComponentSystem
 
     private static Image waveFillImage;
     private static TextMeshProUGUI currencyAmount;
+    private static GameObject ingameMenu;
+    private static GameObject mainMenu;
 
     public static void SetupGameObjects(EntityManager entityManager)
     {
@@ -73,6 +74,19 @@ public class UpdateHUDSystem : ComponentSystem
                 currencyAmount = text;
             }
         }
+        
+        var playButton = GameObject.Find("PlayButton");
+        ingameMenu = GameObject.Find("InGameMenu");
+        mainMenu = GameObject.Find("MainMenu");
+        if (playButton != null)
+        {
+            playButton.GetComponent<Button>().onClick.AddListener(()=>
+            {
+                mainMenu.gameObject.SetActive(false);
+                Bootstrap.NewGame();
+                ingameMenu.gameObject.SetActive(true);
+            });
+        }
     }
 
     private static void TurretButtonListener(EntityManager entityManager)
@@ -99,6 +113,11 @@ public class UpdateHUDSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if (m_WaveSpawnState.Length <= 0)
+        {
+            return;
+        }
+        
         var wave = m_WaveSpawnState.Wave[0];
         if (wave.SpawnedEnemyCount >= 3)
         {
