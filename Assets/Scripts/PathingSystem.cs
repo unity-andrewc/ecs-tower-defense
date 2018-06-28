@@ -85,11 +85,12 @@ public class PathingSystem : ComponentSystem
     }
     [Inject] private GoalPointData m_GoalPointData;
 
-    private int2 m_Start;
     private int2 m_Goal;
 
     private int2[] m_NeighborOffsetsCardinal;
     private int2[] m_NeighborOffsetsIntercardinal;
+    
+    private GridBitfield m_PreviousBlockedTerrain;
 
     private float CalcHeurisitic(int2 lhs, int2 rhs)
     {
@@ -125,7 +126,7 @@ public class PathingSystem : ComponentSystem
             !blockedTerrain[coords.x, coords.y];
     }
 
-    private float3 HandleLiveEnemy(EnemyState enemyState, GridBitfield blockedTerrainForCardinal, GridBitfield blockedTerrainForIntercardinal)
+    private float3 HandleLiveEnemy(float3 currentPosition, EnemyState enemyState, GridBitfield blockedTerrainForCardinal, GridBitfield blockedTerrainForIntercardinal)
     {
         {
             List<float3> path = m_PathManager.GetPath(enemyState.PathId);
@@ -136,21 +137,22 @@ public class PathingSystem : ComponentSystem
             }
         }
 
+        int2 currentGridIdx = Grid.ConvertToGridIndex(currentPosition);
         GridBitfield closedSet = new GridBitfield();
 
         // TODO: clean up the terrible perf incurred from just using an array here
         List<int2> openSet = new List<int2>();
-        openSet.Add(m_Start); // TODO: need to use actual enemy position and map to grid index here
+        openSet.Add(Grid.ConvertToGridIndex(currentPosition));
 
         Dictionary<int2, int2> cameFrom = new Dictionary<int2, int2>();
 
         // nodes have a default value of infinity
         Dictionary<int2, float> gScore = new Dictionary<int2, float>();
-        gScore[m_Start] = 0.0f; // TODO: use actual position
+        gScore[currentGridIdx] = 0.0f;
 
         // nodes have a default value of infinity
         Dictionary<int2, float> fScore = new Dictionary<int2, float>();
-        fScore[m_Start] = CalcHeurisitic(m_Start, m_Goal); // TODO: use actual position (get rid of m_Start)
+        fScore[currentGridIdx] = CalcHeurisitic(currentGridIdx, m_Goal);
 
         bool pathFound = false;
         while (openSet.Count > 0)
@@ -261,7 +263,6 @@ public class PathingSystem : ComponentSystem
     //bool first = true;
     protected override unsafe void OnUpdate()
     {
-        m_Start = m_SpawnPointData.SpawnPoint[0].GridIndex;
         m_Goal = m_GoalPointData.GoalPoint[0].GridIndex;
 
         GridBitfield blockedTerrainForCardinal = new GridBitfield();
@@ -281,16 +282,21 @@ public class PathingSystem : ComponentSystem
                 blockedTerrainForIntercardinal[turretGridCoords.x, turretGridCoords.y + 1] = true;
         }
 
+        // clear out all previous paths to force path-recompute if the tower layour has changed
+        if (m_PreviousBlockedTerrain != null && m_PreviousBlockedTerrain != blockedTerrainForCardinal)
+            m_PathManager.ForcePathRecompute();
+        m_PreviousBlockedTerrain = blockedTerrainForCardinal;
+
         for (int trackedEnemyIndex = 0; trackedEnemyIndex < m_TrackedEnemyData.Length; ++trackedEnemyIndex)
         {
             float3 currentPos = m_TrackedEnemyData.Positions[trackedEnemyIndex].Value;
-            float3 target = HandleLiveEnemy(m_TrackedEnemyData.EnemyStates[trackedEnemyIndex], blockedTerrainForCardinal, blockedTerrainForIntercardinal);
+            float3 target = HandleLiveEnemy(currentPos, m_TrackedEnemyData.EnemyStates[trackedEnemyIndex], blockedTerrainForCardinal, blockedTerrainForIntercardinal);
 
             if (currentPos.Equals(target))
             {
                 List<float3> path = m_PathManager.GetPath(m_TrackedEnemyData.EnemyStates[trackedEnemyIndex].PathId);
                 path.RemoveAt(path.Count - 1);
-                target = HandleLiveEnemy(m_TrackedEnemyData.EnemyStates[trackedEnemyIndex], blockedTerrainForCardinal, blockedTerrainForIntercardinal);
+                target = HandleLiveEnemy(currentPos, m_TrackedEnemyData.EnemyStates[trackedEnemyIndex], blockedTerrainForCardinal, blockedTerrainForIntercardinal);
             }
 
             float3 delta = Time.deltaTime * m_TrackedEnemyData.Enemies[trackedEnemyIndex].Speed * math.normalize(target - currentPos);
@@ -369,6 +375,15 @@ public class PathingSystem : ComponentSystem
         {
             m_Paths[id - 1] = null;
             m_FreeList.Add(id - 1);
+        }
+
+        public void ForcePathRecompute()
+        {
+            foreach (List<float3> path in m_Paths)
+            {
+                if (path != null)
+                    path.Clear();
+            }
         }
 
         private List<List<float3>> m_Paths;
