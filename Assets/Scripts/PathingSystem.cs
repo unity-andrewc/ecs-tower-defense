@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -14,18 +13,6 @@ public class PathingSystem : ComponentSystem
         Grid.Configure(new int2(20, 20), new float2(1.0f, 1.0f), new float3(0.0f, 0.0f, 0.0f));
 
         m_PathManager = new PathManager();
-
-        m_NeighborOffsetsCardinal = new int2[4];
-        m_NeighborOffsetsCardinal[0] = new int2(1, 0);
-        m_NeighborOffsetsCardinal[1] = new int2(0, 1);
-        m_NeighborOffsetsCardinal[2] = new int2(-1, 0);
-        m_NeighborOffsetsCardinal[3] = new int2(0, -1);
-
-        m_NeighborOffsetsIntercardinal = new int2[4];
-        m_NeighborOffsetsIntercardinal[0] = new int2(1, 1);
-        m_NeighborOffsetsIntercardinal[1] = new int2(-1, 1);
-        m_NeighborOffsetsIntercardinal[2] = new int2(-1, -1);
-        m_NeighborOffsetsIntercardinal[3] = new int2(1, -1);
     }
 
     struct TrackedEnemyData
@@ -64,7 +51,7 @@ public class PathingSystem : ComponentSystem
     {
         public ComponentDataArray<TurretBodyState> TurretBodies;
         public ComponentDataArray<Position>        Positions;
-        public SubtractiveComponent<InputState>    InputState;
+        public SubtractiveComponent<InputState>    NoInput;
 
         public int Length;
     }
@@ -86,14 +73,9 @@ public class PathingSystem : ComponentSystem
     }
     [Inject] private GoalPointData m_GoalPointData;
 
-    private int2 m_Goal;
-
-    private int2[] m_NeighborOffsetsCardinal;
-    private int2[] m_NeighborOffsetsIntercardinal;
-    
     private GridBitfield m_PreviousBlockedTerrain;
 
-    private float CalcHeurisitic(int2 lhs, int2 rhs)
+    private static float CalcHeurisitic(int2 lhs, int2 rhs)
     {
         return math.length(rhs - lhs);
     }
@@ -117,7 +99,7 @@ public class PathingSystem : ComponentSystem
         return 1;
     }
 
-    private bool IsNavigableGridIndex(GridBitfield blockedTerrain, int2 coords)
+    private static bool IsNavigableGridIndex(GridBitfield blockedTerrain, int2 coords)
     {
         return
             coords.x >= 0 &&
@@ -127,35 +109,30 @@ public class PathingSystem : ComponentSystem
             !blockedTerrain[coords.x, coords.y];
     }
 
-    private float3 HandleLiveEnemy(float3 currentPosition, EnemyState enemyState, GridBitfield blockedTerrainForCardinal, GridBitfield blockedTerrainForIntercardinal)
+    public static bool TryFindPathWithBlocker(int2 blockerGridIndex)
     {
-        {
-            List<float3> path = m_PathManager.GetPath(enemyState.PathId);
-            if (path.Count > 0)
-            {
-                float3 ret = path[path.Count - 1];
-                return ret;
-            }
-        }
+        Dictionary<int2, int2> cameFrom;
+        return TryFindPath(s_Start, out cameFrom, blockerGridIndex);
+    }
 
-        int2 currentGridIdx = Grid.ConvertToGridIndex(currentPosition);
+    private static bool TryFindPath(int2 currentGridIndex, out Dictionary<int2, int2> cameFrom, int2? blocker)
+    {
         GridBitfield closedSet = new GridBitfield();
 
         // TODO: clean up the terrible perf incurred from just using an array here
         List<int2> openSet = new List<int2>();
-        openSet.Add(Grid.ConvertToGridIndex(currentPosition));
+        openSet.Add(currentGridIndex);
 
-        Dictionary<int2, int2> cameFrom = new Dictionary<int2, int2>();
+        cameFrom = new Dictionary<int2, int2>();
 
         // nodes have a default value of infinity
         Dictionary<int2, float> gScore = new Dictionary<int2, float>();
-        gScore[currentGridIdx] = 0.0f;
+        gScore[currentGridIndex] = 0.0f;
 
         // nodes have a default value of infinity
         Dictionary<int2, float> fScore = new Dictionary<int2, float>();
-        fScore[currentGridIdx] = CalcHeurisitic(currentGridIdx, m_Goal);
+        fScore[currentGridIndex] = CalcHeurisitic(currentGridIndex, s_Goal);
 
-        bool pathFound = false;
         while (openSet.Count > 0)
         {
             int bestIndex = 0;
@@ -166,21 +143,8 @@ public class PathingSystem : ComponentSystem
             }
 
             int2 currentNode = openSet[bestIndex];
-            if (m_Goal.Equals(currentNode))
-            {
-                pathFound = true;
-
-                List<float3> path = m_PathManager.GetPath(enemyState.PathId);
-                path.Add(Grid.ConvertToWorldPosition(currentNode));
-                while (cameFrom.ContainsKey(currentNode))
-                {
-                    currentNode = cameFrom[currentNode];
-                    path.Add(Grid.ConvertToWorldPosition(currentNode));
-                }
-
-                float3 ret = path[path.Count - 1];
-                return ret;
-            }
+            if (s_Goal.Equals(currentNode))
+                return true;
 
             openSet.RemoveAt(bestIndex);
             closedSet[currentNode] = true;
@@ -188,10 +152,10 @@ public class PathingSystem : ComponentSystem
             int numNeighbors = 0;
 
             int blockedCardinalFlags = 0;
-            for (int neighborIndex = 0; neighborIndex < m_NeighborOffsetsCardinal.Length; ++neighborIndex)
+            for (int neighborIndex = 0; neighborIndex < s_NeighborOffsetsCardinal.Length; ++neighborIndex)
             {
-                int2 neighbor = currentNode + m_NeighborOffsetsCardinal[neighborIndex];
-                if (!IsNavigableGridIndex(blockedTerrainForCardinal, neighbor))
+                int2 neighbor = currentNode + s_NeighborOffsetsCardinal[neighborIndex];
+                if (!IsNavigableGridIndex(s_BlockedTerrainCardinal, neighbor) || blocker != null && neighbor.Equals(blocker))
                 {
                     blockedCardinalFlags |= 1 << neighborIndex;
                     continue;
@@ -201,14 +165,14 @@ public class PathingSystem : ComponentSystem
                 ++numNeighbors;
             }
 
-            for (int neighborIndex = 0; neighborIndex < m_NeighborOffsetsIntercardinal.Length; ++neighborIndex)
+            for (int neighborIndex = 0; neighborIndex < s_NeighborOffsetsIntercardinal.Length; ++neighborIndex)
             {
                 int adjacentCardinalFlags = (1 << neighborIndex) | (1 << ((neighborIndex + 1) % 4));
                 if (adjacentCardinalFlags == (adjacentCardinalFlags & blockedCardinalFlags))
                     continue;
 
-                int2 neighbor = currentNode + m_NeighborOffsetsIntercardinal[neighborIndex];
-                if (!IsNavigableGridIndex(blockedTerrainForIntercardinal, neighbor))
+                int2 neighbor = currentNode + s_NeighborOffsetsIntercardinal[neighborIndex];
+                if (!IsNavigableGridIndex(s_BlockedTerrainIntercardinal, neighbor))
                     continue;
 
                 neighbors[numNeighbors] = neighbor;
@@ -243,12 +207,41 @@ public class PathingSystem : ComponentSystem
 
                 cameFrom[neighbors[neighborIndex]] = currentNode;
                 gScore[neighbors[neighborIndex]] = tentativeScoreFromStart;
-                fScore[neighbors[neighborIndex]] = tentativeScoreFromStart + CalcHeurisitic(neighbors[neighborIndex], m_Goal);
+                fScore[neighbors[neighborIndex]] = tentativeScoreFromStart + CalcHeurisitic(neighbors[neighborIndex], s_Goal);
             }
         }
 
-        Debug.LogError("FAILED TO FIND PATH");
-        return -Vector3.one;
+        return false;
+    }
+
+    private float3 HandleLiveEnemy(int2 currentPosition, EnemyState enemyState)
+    {
+        {
+            List<float3> path = m_PathManager.GetPath(enemyState.PathId);
+            if (path.Count > 0)
+            {
+                float3 ret = path[path.Count - 1];
+                return ret;
+            }
+        }
+
+        Dictionary<int2, int2> cameFrom;
+        if (TryFindPath(currentPosition, out cameFrom, null))
+        {
+            List<float3> path = m_PathManager.GetPath(enemyState.PathId);
+            int2 currentNode = s_Goal;
+            path.Add(Grid.ConvertToWorldPosition(currentNode));
+            while (cameFrom.ContainsKey(currentNode))
+            {
+                currentNode = cameFrom[currentNode];
+                path.Add(Grid.ConvertToWorldPosition(currentNode));
+            }
+
+            return path[path.Count - 1];
+        }
+
+        Debug.LogError("FAILED TO FIND PATH!");
+        return new float3(-1.0f, -1.0f, -1.0f);
     }
 
     private static bool WouldDeltaJumpTarget(float3 old, float3 delta, float3 target)
@@ -264,45 +257,46 @@ public class PathingSystem : ComponentSystem
     //bool first = true;
     protected override unsafe void OnUpdate()
     {
-        m_Goal = m_GoalPointData.GoalPoint[0].GridIndex;
-
-        GridBitfield blockedTerrainForCardinal = new GridBitfield();
-        GridBitfield blockedTerrainForIntercardinal = new GridBitfield();
+        s_Start = m_SpawnPointData.SpawnPoint[0].GridIndex;
+        s_Goal = m_GoalPointData.GoalPoint[0].GridIndex;
+        s_BlockedTerrainCardinal = new GridBitfield();
+        s_BlockedTerrainIntercardinal = new GridBitfield();
         for (int turretIndex = 0; turretIndex < m_TurretData.Length; ++turretIndex)
         {
             int2 turretGridCoords = Grid.ConvertToGridIndex(m_TurretData.Positions[turretIndex].Value);
-            blockedTerrainForCardinal[turretGridCoords] = true;
-            blockedTerrainForIntercardinal[turretGridCoords] = true;
+            s_BlockedTerrainCardinal[turretGridCoords] = true;
+            s_BlockedTerrainIntercardinal[turretGridCoords] = true;
             if (turretGridCoords.x > 0)
-                blockedTerrainForIntercardinal[turretGridCoords.x - 1, turretGridCoords.y] = true;
+                s_BlockedTerrainIntercardinal[turretGridCoords.x - 1, turretGridCoords.y] = true;
             if (turretGridCoords.x < Grid.NumCells.x - 1)
-                blockedTerrainForIntercardinal[turretGridCoords.x + 1, turretGridCoords.y] = true;
+                s_BlockedTerrainIntercardinal[turretGridCoords.x + 1, turretGridCoords.y] = true;
             if (turretGridCoords.y > 0)
-                blockedTerrainForIntercardinal[turretGridCoords.x, turretGridCoords.y - 1] = true;
+                s_BlockedTerrainIntercardinal[turretGridCoords.x, turretGridCoords.y - 1] = true;
             if (turretGridCoords.y < Grid.NumCells.y - 1)
-                blockedTerrainForIntercardinal[turretGridCoords.x, turretGridCoords.y + 1] = true;
+                s_BlockedTerrainIntercardinal[turretGridCoords.x, turretGridCoords.y + 1] = true;
         }
 
         // clear out all previous paths to force path-recompute if the tower layour has changed
-        if (m_PreviousBlockedTerrain != null && m_PreviousBlockedTerrain != blockedTerrainForCardinal)
+        if (m_PreviousBlockedTerrain != null && m_PreviousBlockedTerrain != s_BlockedTerrainCardinal)
             m_PathManager.ForcePathRecompute();
-        m_PreviousBlockedTerrain = blockedTerrainForCardinal;
+        m_PreviousBlockedTerrain = s_BlockedTerrainCardinal;
 
         for (int trackedEnemyIndex = 0; trackedEnemyIndex < m_TrackedEnemyData.Length; ++trackedEnemyIndex)
         {
             float3 currentPos = m_TrackedEnemyData.Positions[trackedEnemyIndex].Value;
-            float3 target = HandleLiveEnemy(currentPos, m_TrackedEnemyData.EnemyStates[trackedEnemyIndex], blockedTerrainForCardinal, blockedTerrainForIntercardinal);
+            int2 currentGridIndex = Grid.ConvertToGridIndex(currentPos);
+            float3 target = HandleLiveEnemy(currentGridIndex, m_TrackedEnemyData.EnemyStates[trackedEnemyIndex]);
 
             if (currentPos.Equals(target))
             {
                 List<float3> path = m_PathManager.GetPath(m_TrackedEnemyData.EnemyStates[trackedEnemyIndex].PathId);
                 path.RemoveAt(path.Count - 1);
-                target = HandleLiveEnemy(currentPos, m_TrackedEnemyData.EnemyStates[trackedEnemyIndex], blockedTerrainForCardinal, blockedTerrainForIntercardinal);
+                target = HandleLiveEnemy(currentGridIndex, m_TrackedEnemyData.EnemyStates[trackedEnemyIndex]);
             }
 
             float3 delta = Time.deltaTime * m_TrackedEnemyData.Enemies[trackedEnemyIndex].Speed * math.normalize(target - currentPos);
 
-            if (WouldDeltaJumpTarget(currentPos, delta, target))
+            while (WouldDeltaJumpTarget(currentPos, delta, target))
             {
                 float3 toTarget = target - currentPos;
                 float magDelta = math.length(delta);
@@ -392,4 +386,26 @@ public class PathingSystem : ComponentSystem
     }
 
     private PathManager m_PathManager;
+
+    static PathingSystem()
+    {
+        s_NeighborOffsetsCardinal = new int2[4];
+        s_NeighborOffsetsCardinal[0] = new int2(1, 0);
+        s_NeighborOffsetsCardinal[1] = new int2(0, 1);
+        s_NeighborOffsetsCardinal[2] = new int2(-1, 0);
+        s_NeighborOffsetsCardinal[3] = new int2(0, -1);
+
+        s_NeighborOffsetsIntercardinal = new int2[4];
+        s_NeighborOffsetsIntercardinal[0] = new int2(1, 1);
+        s_NeighborOffsetsIntercardinal[1] = new int2(-1, 1);
+        s_NeighborOffsetsIntercardinal[2] = new int2(-1, -1);
+        s_NeighborOffsetsIntercardinal[3] = new int2(1, -1);
+    }
+
+    private static int2 s_Start;
+    private static int2 s_Goal;
+    private static int2[] s_NeighborOffsetsCardinal;
+    private static int2[] s_NeighborOffsetsIntercardinal;
+    private static GridBitfield s_BlockedTerrainCardinal;
+    private static GridBitfield s_BlockedTerrainIntercardinal;
 }
