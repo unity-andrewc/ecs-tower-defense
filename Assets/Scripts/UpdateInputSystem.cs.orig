@@ -1,0 +1,148 @@
+﻿using ComponentTypes;
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using UnityEngine;
+
+[AlwaysUpdateSystem]
+public class UpdateInputSystem : ComponentSystem
+{
+    public struct InputData
+    {
+        public int Length;
+        public EntityArray InputEntities;
+        public ComponentDataArray<InputState> Input;
+        public ComponentDataArray<Position> TurretPosition;
+    }
+    
+    public struct InputDataChildren
+    {
+        public int Length;
+        public EntityArray InputEntities;
+        public ComponentDataArray<InputState> Input;
+        public ComponentDataArray<LocalPosition> TurretHeadPosition;
+    }
+    
+    public struct PlayerData
+    {
+        public int Length;
+        public ComponentDataArray<PlayerSessionData> Player;
+    }
+
+    [Inject] InputData m_Inputs;
+    [Inject] InputDataChildren m_InputChildren;
+    [Inject] PlayerData m_PlayerData;
+
+    protected override void OnUpdate()
+    {
+        if (m_PlayerData.Player.Length < 0 || m_PlayerData.Player[0].CurrencyAmount <= 0)
+        {
+            for (int i = 0; i < m_Inputs.InputEntities.Length; i++)
+            {
+                var data = m_Inputs.InputEntities[i];
+                PostUpdateCommands.DestroyEntity(data);
+            }
+            for (int i = 0; i < m_InputChildren.InputEntities.Length; i++)
+            {
+                var data = m_InputChildren.InputEntities[i];
+                PostUpdateCommands.DestroyEntity(data);
+            }
+            
+            return;
+        }
+        
+        if (m_Inputs.Length > 0)
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit))
+            {
+                var gridIndex = Grid.ConvertToGridIndex(hit.point);
+                var gridWorldPos = Grid.ConvertToWorldPosition(gridIndex);
+<<<<<<< HEAD
+                gridWorldPos -= new float3(0.0f, 1.0f, 0.0f);
+=======
+>>>>>>> 0aca15e8cacfcd82692032581066fee2a8641425
+                
+                if (Input.GetMouseButtonDown(0))
+                {
+                    if (hit.collider.tag.Equals("Floor") && PathingSystem.TryFindPathWithBlocker(gridIndex))
+                    {
+                        for (int i = 0; i < m_PlayerData.Player.Length; i++)
+                        {
+                            var playerData = m_PlayerData.Player[i];
+                            playerData.CurrencyAmount--;
+                            m_PlayerData.Player[i] = playerData;
+                        }
+
+                        InstanceTurret(gridWorldPos);
+                    } 
+                }
+                else if (Input.GetMouseButtonDown(1))
+                {
+                    for (int i = 0; i < m_Inputs.InputEntities.Length; i++)
+                    {
+                        var data = m_Inputs.InputEntities[i];
+                        PostUpdateCommands.DestroyEntity(data);
+                    }
+                    for (int i = 0; i < m_InputChildren.InputEntities.Length; i++)
+                    {
+                        var data = m_InputChildren.InputEntities[i];
+                        PostUpdateCommands.DestroyEntity(data);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < m_Inputs.TurretPosition.Length; i++)
+                    {
+                        var data = m_Inputs.TurretPosition[i];
+                        data = new Position(gridWorldPos);
+                        m_Inputs.TurretPosition[i] = data;
+                    }
+                }
+            }
+        }
+    }
+
+    public static void InstanceTurret(float3 position)
+    {
+
+        var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+        Matrix4x4 trans = Matrix4x4.Translate(position);
+//        Vector3 headPosition = position + new float3(0.0f, 0.6128496f, 0.0f);
+//        Vector3 gun1Position = new Vector3(0.08563034f, 0.08383693f, 0.327976f);
+//        Vector3 gun2Position = new Vector3(-0.08563034f, 0.08383693f, 0.327976f);
+//        float rotateAngle = Random.Range(0.0f, 360.0f);
+
+        Entity turretBody = entityManager.CreateEntity(Bootstrap.TurretBodyArchetype);
+        Entity turretHead = entityManager.CreateEntity(Bootstrap.TurretHeadArchetype);
+        Entity turretGun1 = entityManager.CreateEntity(Bootstrap.TurretGun1Archetype);
+        Entity turretGun2 = entityManager.CreateEntity(Bootstrap.TurretGun2Archetype);
+
+        Matrix4x4 world = trans;
+
+        entityManager.SetComponentData(turretBody, new TransformMatrix {Value = world});
+        entityManager.SetComponentData(turretBody, new Position {Value = position});
+        entityManager.SetComponentData(turretBody, new Rotation {Value = quaternion.identity});
+        entityManager.AddSharedComponentData(turretBody, Bootstrap.TurretBodyLook);
+
+        entityManager.SetComponentData(turretHead, new TransformMatrix {Value = world});
+        entityManager.SetComponentData(turretHead, new LocalPosition {Value = new Vector3(0.0f, 0.6128496f, 0.0f)});
+        entityManager.SetComponentData(turretHead, new LocalRotation {Value = quaternion.identity});
+        entityManager.SetComponentData(turretHead, new TransformParent {Value = turretBody});
+        entityManager.AddSharedComponentData(turretHead, Bootstrap.TurretHeadLook);
+
+        entityManager.SetComponentData(turretGun1, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretGun1, new TransformParent {Value = turretHead});
+        entityManager.SetComponentData(turretGun1, new LocalPosition {Value = new Vector3(0.08563034f, 0.08383693f, 0.327976f)});
+        entityManager.SetComponentData(turretGun1, new LocalRotation {Value = quaternion.identity});
+        entityManager.AddSharedComponentData(turretGun1, Bootstrap.TurretGun1Look);
+
+        entityManager.SetComponentData(turretGun2, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretGun2, new TransformParent {Value = turretHead});
+        entityManager.SetComponentData(turretGun2, new LocalPosition {Value = new Vector3(-0.08563034f, 0.08383693f, 0.327976f)});
+        entityManager.SetComponentData(turretGun2, new LocalRotation {Value = quaternion.identity});
+        entityManager.AddSharedComponentData(turretGun2, Bootstrap.TurretGun2Look);
+        
+    }
+}
