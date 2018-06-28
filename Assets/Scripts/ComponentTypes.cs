@@ -30,6 +30,7 @@ namespace ComponentTypes
 	public struct Enemy : IComponentData
     {
         public float Speed;
+		public int Health;
     }
 
     public struct EnemyState : ISystemStateComponentData
