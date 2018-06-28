@@ -50,10 +50,12 @@ public class MissileImpactSystem : ComponentSystem
         for (int mIdx = 0; mIdx < m_missileData.Length; ++mIdx)
         {
             float3 missilePos = m_missileData.Positions[mIdx].Value;
+            missilePos.y = 0.0f;
 
             for (int eIdx = 0; eIdx < m_enemyData.Length; ++eIdx)
             {
                 float3 enemyPos = m_enemyData.Positions[eIdx].Value;
+                enemyPos.y = 0.0f;
 
                 if (math.length(enemyPos - missilePos) < 0.5f)
                 {

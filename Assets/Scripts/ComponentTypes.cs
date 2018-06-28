@@ -14,6 +14,7 @@ namespace ComponentTypes
 		public float Angle;
 		public Vector3 Translation;
 		public float TimeSinceLastFire;
+		public int CanFire;
 	}
 
 	public struct TurretGun1State : IComponentData

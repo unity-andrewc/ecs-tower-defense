@@ -65,12 +65,15 @@ public class TurretSystem : ComponentSystem
 
             ComponentTypes.TurretHeadState tempState = m_data.State[idx];
             tempState.TimeSinceLastFire += Time.deltaTime;
+            tempState.CanFire = 0;
             
             float delta = tempState.TargetAngle - tempState.Angle;
 
             float rotSpeed = 45.0f;
             if (nearestFound)
             {
+                tempState.CanFire = 1;
+
                 nearestToEnemy.Normalize();
                 float dot = Vector3.Dot(new Vector3 (0.0f, 0.0f, 1.0f), nearestToEnemy);
                 Vector3 cross = Vector3.Cross(new Vector3 (0.0f, 0.0f, 1.0f), nearestToEnemy);
