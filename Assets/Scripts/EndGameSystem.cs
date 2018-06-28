@@ -41,12 +41,6 @@ public class EndGameSystem : ComponentSystem
 
         if (m_PlayerData.Player[0].Health <= 0)
         {
-            for (int i = m_PosEntities.Length-1; i >= 0; i--)
-            {
-                var entity = m_PosEntities.Entities[i];
-                PostUpdateCommands.DestroyEntity(entity);
-            }
-            
             var playerData = m_PlayerData.Player[0];
             playerData.gameState = GameState.END_GAME;
             playerData.Health = 10;
@@ -62,6 +56,12 @@ public class EndGameSystem : ComponentSystem
             wave.Cooldown = Constants.Enemy.WAVE_COOLDOWN;
         
             m_WaveSpawnState.Wave[0] = wave;
+            
+            for (int i = m_PosEntities.Length-1; i >= 0; i--)
+            {
+                var entity = m_PosEntities.Entities[i];
+                PostUpdateCommands.DestroyEntity(entity);
+            }
         }
     }
 

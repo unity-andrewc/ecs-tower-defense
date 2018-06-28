@@ -128,13 +128,13 @@ public class UpdateInputSystem : ComponentSystem
         entityManager.SetComponentData(turretHead, new TransformParent {Value = turretBody});
         entityManager.AddSharedComponentData(turretHead, Bootstrap.TurretHeadLook);
 
-        entityManager.SetComponentData(turretGun1, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretGun1, new TransformMatrix {Value = world});
         entityManager.SetComponentData(turretGun1, new TransformParent {Value = turretHead});
         entityManager.SetComponentData(turretGun1, new LocalPosition {Value = new Vector3(0.08563034f, 0.08383693f, 0.327976f)});
         entityManager.SetComponentData(turretGun1, new LocalRotation {Value = quaternion.identity});
         entityManager.AddSharedComponentData(turretGun1, Bootstrap.TurretGun1Look);
 
-        entityManager.SetComponentData(turretGun2, new TransformMatrix {Value = Matrix4x4.identity});
+        entityManager.SetComponentData(turretGun2, new TransformMatrix {Value = world});
         entityManager.SetComponentData(turretGun2, new TransformParent {Value = turretHead});
         entityManager.SetComponentData(turretGun2, new LocalPosition {Value = new Vector3(-0.08563034f, 0.08383693f, 0.327976f)});
         entityManager.SetComponentData(turretGun2, new LocalRotation {Value = quaternion.identity});

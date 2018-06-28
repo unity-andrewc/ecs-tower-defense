@@ -120,7 +120,7 @@ public class EnemySpawnSystem : ComponentSystem
         PostUpdateCommands.SetComponent(new TransformMatrix { Value = trs });
         PostUpdateCommands.SetComponent(new Position { Value = spawnPosition });
         PostUpdateCommands.SetComponent(new Rotation { Value = quaternion.identity });
-        PostUpdateCommands.SetComponent(new Enemy { Speed = 3.7f, Health = 3 });
+        PostUpdateCommands.SetComponent(new Enemy { Speed = 3.7f, Health = wave.SpawnedWaveCount * (wave.SpawnedWaveCount / 2) + 1 });
         PostUpdateCommands.AddSharedComponent(Bootstrap.Enemy1BodyLook);  
         wave.RandomState = Random.state;
 

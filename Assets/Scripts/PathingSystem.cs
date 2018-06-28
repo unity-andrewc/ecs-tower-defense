@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using ComponentTypes;
+using UnityEngine.Experimental.PlayerLoop;
 
 public class PathingSystem : ComponentSystem
 {
@@ -243,8 +244,10 @@ public class PathingSystem : ComponentSystem
                 currentNode = cameFrom[currentNode];
                 path.Add(Grid.ConvertToWorldPosition(currentNode) + new float3(0.0f, 1.0f, 0.0f));
             }
-            path.RemoveAt(path.Count - 1);
 
+            path.RemoveAt(path.Count - 1);
+            if (path.Count == 1)
+                return path[0];
             return path[path.Count - 1];
         }
 
@@ -265,6 +268,13 @@ public class PathingSystem : ComponentSystem
     //bool first = true;
     protected override unsafe void OnUpdate()
     {
+        var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+        for (int danglingEnemyIndex = 0; danglingEnemyIndex < m_DanglingEnemyData.Length; ++danglingEnemyIndex)
+        {
+            m_PathManager.RemovePath(m_DanglingEnemyData.EnemyStates[danglingEnemyIndex].PathId);
+            PostUpdateCommands.RemoveComponent<EnemyState>(m_DanglingEnemyData.Entities[danglingEnemyIndex]);
+        }
+        
         s_Start = m_SpawnPointData.SpawnPoint[0].GridIndex;
         s_Goal = m_GoalPointData.GoalPoint[0].GridIndex;
         s_BlockedTerrainCardinal = new GridBitfield();
@@ -337,17 +347,10 @@ public class PathingSystem : ComponentSystem
             m_TrackedEnemyData.Positions[trackedEnemyIndex] = new Position { Value = currentPos + delta };
         }
 
-        var entityManager = World.Active.GetOrCreateManager<EntityManager>();
         for (int newEnemyIndex = 0; newEnemyIndex < m_NewEnemyData.Length; ++newEnemyIndex)
         {
             EnemyState enemyState = new EnemyState{ PathId = m_PathManager.AddPath() };
-            entityManager.AddComponentData<EnemyState>(m_NewEnemyData.Entities[newEnemyIndex], enemyState);
-        }
-
-        for (int danglingEnemyIndex = 0; danglingEnemyIndex < m_DanglingEnemyData.Length; ++danglingEnemyIndex)
-        {
-            m_PathManager.RemovePath(m_DanglingEnemyData.EnemyStates[danglingEnemyIndex].PathId);
-            entityManager.RemoveComponent<EnemyState>(m_DanglingEnemyData.Entities[danglingEnemyIndex]);
+            PostUpdateCommands.AddComponent(m_NewEnemyData.Entities[newEnemyIndex], enemyState);
         }
     }
 
